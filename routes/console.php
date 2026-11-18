@@ -9,3 +9,6 @@ Schedule::command('publications:process-lifecycle')->hourly()->withoutOverlappin
 Schedule::command('model:prune', ['--model' => [ContactMessage::class]])->daily();
 
 Schedule::command('visibility:expire')->hourly()->withoutOverlapping()->onOneServer();
+
+Schedule::command('memberships:send-reminders')->dailyAt('08:00')->withoutOverlapping()->onOneServer();
+Schedule::command('payments:reconcile')->everyTenMinutes()->withoutOverlapping()->onOneServer();

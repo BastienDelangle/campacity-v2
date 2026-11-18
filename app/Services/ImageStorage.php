@@ -50,6 +50,8 @@ class ImageStorage
             return null;
         }
 
+        $this->ensureEnoughMemory($file);
+
         $image = match ($file->getMimeType()) {
             'image/jpeg' => @imagecreatefromjpeg($file->getRealPath()),
             'image/png' => @imagecreatefrompng($file->getRealPath()),
@@ -103,5 +105,38 @@ class ImageStorage
         imagedestroy($image);
 
         return $resized;
+    }
+
+    /**
+     * GD décompresse l'image en mémoire (~4 octets par pixel, plus le
+     * redimensionnement) : on relève la limite pour ce traitement si besoin.
+     */
+    private function ensureEnoughMemory(UploadedFile $file): void
+    {
+        [$width, $height] = getimagesize($file->getRealPath()) ?: [0, 0];
+        $needed = (int) ($width * $height * 4 * 1.8) + memory_get_usage() + 16 * 1024 * 1024;
+        $limit = $this->bytes((string) ini_get('memory_limit'));
+
+        if ($limit !== -1 && $needed > $limit) {
+            ini_set('memory_limit', (string) min($needed, 768 * 1024 * 1024));
+        }
+    }
+
+    private function bytes(string $value): int
+    {
+        $value = trim($value);
+
+        if ($value === '-1') {
+            return -1;
+        }
+
+        $number = (int) $value;
+
+        return match (strtolower(substr($value, -1))) {
+            'g' => $number * 1024 ** 3,
+            'm' => $number * 1024 ** 2,
+            'k' => $number * 1024,
+            default => $number,
+        };
     }
 }

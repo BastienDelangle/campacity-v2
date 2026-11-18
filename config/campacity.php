@@ -19,6 +19,8 @@ return [
         'publication_max_images' => 6,
         // Nombre maximal de pièces jointes par publication.
         'publication_max_attachments' => 3,
+        // Montant de la cotisation annuelle, en centimes (à valider).
+        'membership_fee_cents' => 2000,
     ],
 
     // Catégories rattachées à la rubrique « Formations et rendez-vous »
@@ -37,6 +39,16 @@ return [
         'default_zoom' => 6,
         // Nombre maximal de repères envoyés à la carte.
         'max_markers' => 500,
+    ],
+
+    // Adhésions (cahier § 11). Le montant de la cotisation est un paramètre
+    // administrable (settings.membership_fee_cents).
+    'membership' => [
+        'duration_months' => 12,
+        // Renouvellement anticipé : prolongation à partir de l'expiration en cours.
+        'early_renewal_extends' => true,
+        // Rappels avant expiration, en jours (0 = le jour de l'expiration).
+        'reminder_days' => [30, 7, 0],
     ],
 
     // Conservation des messages de contact, en jours (RGPD). À valider.

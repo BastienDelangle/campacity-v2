@@ -70,7 +70,7 @@ class PublicationRequest extends FormRequest
             'event.registration_url' => ['nullable', 'url:http,https', 'max:255'],
 
             'images' => ['nullable', 'array'],
-            'images.*' => [File::image()->types(['jpg', 'jpeg', 'png', 'webp'])->max(5 * 1024)],
+            'images.*' => [File::image()->types(['jpg', 'jpeg', 'png', 'webp'])->max(5 * 1024)->dimensions(Rule::dimensions()->maxWidth(6000)->maxHeight(6000))],
             'image_alts' => ['nullable', 'array'],
             'image_alts.*' => ['nullable', 'string', 'max:150'],
             'remove_images' => ['nullable', 'array'],

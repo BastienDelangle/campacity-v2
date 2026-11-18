@@ -8,6 +8,7 @@ use App\Events\PaymentSucceeded;
 use App\Models\Payment;
 use App\Models\User;
 use App\Payments\Contracts\PaymentGateway;
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
@@ -50,9 +51,9 @@ class PaymentManager
     /**
      * @param  array<string, mixed>  $metadata
      */
-    public function markSucceeded(Payment $payment, ?string $reference = null, ?User $confirmedBy = null, ?string $note = null, array $metadata = []): Payment
+    public function markSucceeded(Payment $payment, ?string $reference = null, ?User $confirmedBy = null, ?string $note = null, array $metadata = [], ?CarbonInterface $paidAt = null): Payment
     {
-        return DB::transaction(function () use ($payment, $reference, $confirmedBy, $note, $metadata) {
+        return DB::transaction(function () use ($payment, $reference, $confirmedBy, $note, $metadata, $paidAt) {
             $payment = Payment::whereKey($payment->id)->lockForUpdate()->firstOrFail();
 
             if ($payment->status === PaymentStatus::Succeeded) {
@@ -65,7 +66,7 @@ class PaymentManager
 
             $payment->forceFill([
                 'status' => PaymentStatus::Succeeded,
-                'paid_at' => now(),
+                'paid_at' => $paidAt ?? now(),
                 'provider_reference' => $reference ?? $payment->provider_reference,
                 'confirmed_by' => $confirmedBy?->id,
                 'note' => $note ?? $payment->note,

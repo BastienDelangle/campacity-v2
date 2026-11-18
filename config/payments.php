@@ -1,6 +1,7 @@
 <?php
 
 use App\Payments\Gateways\ManualGateway;
+use App\Payments\HelloAsso\HelloAssoGateway;
 
 /*
 | Prestataires de paiement. Le métier (achats de visibilité, adhésions) ne
@@ -13,7 +14,14 @@ return [
     // pour ces achats n'est pas acquise : « manual » par défaut.
     'commercial_gateway' => env('PAYMENT_COMMERCIAL_GATEWAY', 'manual'),
 
+    // Prestataire des adhésions associatives.
+    'membership_gateway' => env('PAYMENT_MEMBERSHIP_GATEWAY', 'helloasso'),
+
     'gateways' => [
+        'helloasso' => [
+            'class' => HelloAssoGateway::class,
+            'label' => 'Carte bancaire (HelloAsso)',
+        ],
         'manual' => [
             'class' => ManualGateway::class,
             'label' => 'Virement ou chèque',

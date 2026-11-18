@@ -21,7 +21,7 @@ class UsersTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn ($query) => $query->with('roles')->withCount('organizations'))
+            ->modifyQueryUsing(fn ($query) => $query->with('roles')->withCount(['organizations', 'memberships' => fn ($q) => $q->current()]))
             ->defaultSort('created_at', 'desc')
             ->columns([
                 TextColumn::make('name')->label('Nom')->searchable()->sortable(),
@@ -31,6 +31,8 @@ class UsersTable
                     ->badge()
                     ->formatStateUsing(fn (string $state) => Role::tryFrom($state)?->label() ?? $state),
                 IconColumn::make('is_trusted')->label('Confiance')->boolean(),
+                IconColumn::make('is_member')->label('Adhérent')->boolean()
+                    ->getStateUsing(fn (User $record) => $record->memberships_count > 0),
                 TextColumn::make('organizations_count')->label('Organisations')->sortable(),
                 IconColumn::make('email_verified_at')->label('Vérifié')->boolean()->getStateUsing(fn (User $record) => $record->email_verified_at !== null),
                 TextColumn::make('anonymized_at')->label('Anonymisé le')->dateTime('d/m/Y')->toggleable(isToggledHiddenByDefault: true),

@@ -62,7 +62,7 @@ class PartnerProfileController extends Controller
             'headline' => ['nullable', 'string', 'max:160'],
             'activity' => ['nullable', 'string', 'max:255'],
             'presentation' => ['nullable', 'string', 'max:8000'],
-            'cover' => ['nullable', File::image()->types(['jpg', 'jpeg', 'png', 'webp'])->max(5 * 1024)],
+            'cover' => ['nullable', File::image()->types(['jpg', 'jpeg', 'png', 'webp'])->max(5 * 1024)->dimensions(Rule::dimensions()->maxWidth(6000)->maxHeight(6000))],
             'remove_cover' => ['boolean'],
         ], attributes: ['headline' => 'accroche', 'activity' => 'activité', 'presentation' => 'présentation', 'cover' => 'image de couverture']);
 

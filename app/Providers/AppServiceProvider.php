@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\Membership;
 use App\Models\VisibilityPurchase;
 use App\Support\Settings;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -29,6 +30,7 @@ class AppServiceProvider extends ServiceProvider
         // Noms stables pour les relations polymorphes des paiements.
         Relation::morphMap([
             'visibility_purchase' => VisibilityPurchase::class,
+            'membership' => Membership::class,
         ]);
 
         Route::resourceVerbs(['create' => 'creer', 'edit' => 'modifier']);

@@ -46,7 +46,10 @@ class ManageSettings extends Page
 
     public function mount(Settings $settings): void
     {
-        $this->form->fill($settings->all());
+        $this->form->fill([
+            ...$settings->all(),
+            'membership_fee_euros' => $settings->int('membership_fee_cents') / 100,
+        ]);
     }
 
     public function form(Schema $schema): Schema
@@ -74,6 +77,13 @@ class ManageSettings extends Page
                             ->label('Une modification sensible d\'une publication en ligne repasse en modération')
                             ->helperText('Titre, description, type, catégorie, nature, origine, adresse ou images. Ne s\'applique pas aux utilisateurs de confiance.')
                             ->columnSpanFull(),
+                    ]),
+                Section::make('Adhésions')
+                    ->components([
+                        TextInput::make('membership_fee_euros')
+                            ->label('Montant de la cotisation annuelle (€)')
+                            ->helperText('Appliqué aux nouvelles adhésions. Valeur par défaut à valider.')
+                            ->numeric()->minValue(1)->maxValue(10000)->required(),
                     ]),
             ]);
     }
@@ -107,6 +117,7 @@ class ManageSettings extends Page
             'publication_max_images' => (int) $data['publication_max_images'],
             'publication_max_attachments' => (int) $data['publication_max_attachments'],
             'publication_edits_require_moderation' => (bool) $data['publication_edits_require_moderation'],
+            'membership_fee_cents' => (int) round(((float) $data['membership_fee_euros']) * 100),
         ]);
 
         Notification::make()->success()->title('Paramètres enregistrés')->send();

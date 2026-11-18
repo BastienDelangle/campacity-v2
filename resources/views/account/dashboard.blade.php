@@ -15,6 +15,10 @@
                 <h2 class="text-lg font-bold">Mes organisations</h2>
                 <p class="mt-1 text-sm text-muted">{{ $organizationsCount ? trans_choice(':count organisation gérée|:count organisations gérées', $organizationsCount) : 'Créer la fiche de votre association, entreprise…' }}</p>
             </a>
+            <a href="{{ route('account.membership') }}" class="card block p-6 hover:border-brand">
+                <h2 class="text-lg font-bold">Mon adhésion</h2>
+                <p class="mt-1 text-sm text-muted">{{ $membership ? 'Adhérent(e) jusqu\'au '.$membership->ends_at->translatedFormat('j F Y') : 'Soutenir l\'association Campacity.' }}</p>
+            </a>
             <a href="{{ route('account.purchases.index') }}" class="card block p-6 hover:border-brand">
                 <h2 class="text-lg font-bold">Mes achats</h2>
                 <p class="mt-1 text-sm text-muted">Mises en avant, vitrines partenaires et paiements.</p>

@@ -12,8 +12,10 @@ use App\Http\Controllers\Account\VisibilityController;
 use App\Http\Controllers\BrowseController;
 use App\Http\Controllers\CommuneSearchController;
 use App\Http\Controllers\ContactMessageController;
+use App\Http\Controllers\MembershipController;
 use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\PartnerController;
+use App\Http\Controllers\Payments\HelloAssoController;
 use App\Http\Controllers\PublicationController;
 use App\Http\Controllers\PublicationReportController;
 use Illuminate\Support\Facades\Route;
@@ -26,6 +28,9 @@ Route::get('/formations-et-rendez-vous', [BrowseController::class, 'section'])->
 Route::get('/partenaires', [PartnerController::class, 'index'])->name('partners.index');
 Route::get('/partenaires/{organization}', [PartnerController::class, 'show'])->name('partners.show');
 Route::get('/offres-de-visibilite', [PartnerController::class, 'offers'])->name('visibility.offers');
+Route::get('/paiement/helloasso/{payment}/retour', [HelloAssoController::class, 'return'])->middleware(['auth', 'throttle:30,1'])->name('payments.helloasso.return');
+Route::post('/webhooks/helloasso', [HelloAssoController::class, 'webhook'])->middleware('throttle:120,1')->name('webhooks.helloasso');
+Route::get('/adherer', [MembershipController::class, 'join'])->name('membership.join');
 Route::get('/communes/recherche', CommuneSearchController::class)->middleware('throttle:60,1')->name('communes.search');
 
 Route::get('/organisations/{organization}', [OrganizationController::class, 'show'])->name('organizations.show');
@@ -50,6 +55,9 @@ Route::middleware(['auth', 'verified'])->prefix('espace')->name('account.')->gro
     Route::get('/organisations/{organization}/partenaire-premium', [PartnerProfileController::class, 'edit'])->name('organizations.partner.edit');
     Route::post('/organisations/{organization}/partenaire-premium', [PartnerProfileController::class, 'subscribe'])->name('organizations.partner.subscribe');
     Route::put('/organisations/{organization}/partenaire-premium', [PartnerProfileController::class, 'update'])->name('organizations.partner.update');
+    Route::get('/adhesion', [MembershipController::class, 'show'])->name('membership');
+    Route::post('/adhesion', [MembershipController::class, 'store'])->name('membership.store');
+    Route::post('/paiements/{payment}/payer', [MembershipController::class, 'pay'])->name('payments.pay');
     Route::get('/achats', [PurchaseController::class, 'index'])->name('purchases.index');
     Route::get('/achats/{purchase}', [PurchaseController::class, 'show'])->name('purchases.show');
     Route::post('/achats/{purchase}/annuler', [PurchaseController::class, 'cancel'])->name('purchases.cancel');

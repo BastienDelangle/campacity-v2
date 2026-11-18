@@ -70,7 +70,7 @@ php artisan test                # suite de tests (base campacity_testing, donné
 vendor/bin/pint                 # formatage du code
 php artisan migrate:fresh --seed  # réinitialise la base locale (destructif)
 php artisan queue:work          # traite la file d'attente
-php artisan schedule:work       # exécute le planificateur en local
+php artisan schedule:work       # exécute le planificateur en local (rappels, expirations, rapprochement des paiements)
 ```
 
 En production, une seule entrée cron est nécessaire : `* * * * * php /chemin/artisan schedule:run`.
@@ -193,6 +193,36 @@ php artisan campacity:import-communes "Nom du territoire" --insee=50147 --insee=
 - **Prestataire `manual` :** virement ou chèque, avec les instructions définies par `PAYMENT_MANUAL_INSTRUCTIONS`. L'acheteur reçoit une référence `CAMP-{id}` ; l'administrateur confirme la réception dans Commercial › Achats › « Paiement reçu », ce qui active l'offre et envoie l'e-mail de confirmation.
 - **Choix du prestataire :** `PAYMENT_COMMERCIAL_GATEWAY` fixe celui des achats commerciaux (`manual` par défaut, puisque l'éligibilité de HelloAsso n'est pas acquise). HelloAsso arrive en phase 7.
 
+### Adhésions
+
+- **Indépendance :** l'adhésion à l'association (`memberships`) est distincte des achats commerciaux. Seule la couche de paiement est commune.
+- **Règles de période (`App\Actions\Memberships\MembershipPeriods`, configurables dans `campacity.membership`) :**
+  - 12 mois à compter de la date de paiement, sans lien avec l'année civile ;
+  - renouvellement anticipé : la nouvelle période démarre à l'expiration de la période en cours ;
+  - renouvellement après expiration : nouvelle période à compter du nouveau paiement.
+- **Activation :** une adhésion n'est active **qu'après confirmation du paiement** (`PaymentSucceeded` → `ActivatePaidMembership`), puis l'e-mail de confirmation d'adhésion part.
+- **Rappels :** `memberships:send-reminders`, tous les jours à 8 h, envoie les rappels à J-30, J-7 et le jour J, sans doublon grâce à une clé unique dans `notification_logs`. Aucun rappel si l'adhérent a déjà renouvelé. La même tâche passe en « expirée » les adhésions échues.
+- **Cotisation :** son montant est un paramètre administrable (Paramètres › Adhésions), 20 € par défaut, à valider.
+- **Administration (Association › Membres et adhésions) :** filtres « à jour » et « expire dans 30 jours », action « Enregistrer une adhésion » pour un règlement hors ligne (même circuit de paiement et mêmes règles).
+- **Historique des notifications :** Configuration › Notifications envoyées enregistre le type, le destinataire, le canal et la date, jamais le contenu.
+
+### HelloAsso
+
+- **Configuration (`.env`) :** `HELLOASSO_ENV` (`sandbox` ou `production`), `HELLOASSO_CLIENT_ID`, `HELLOASSO_CLIENT_SECRET`, `HELLOASSO_ORGANIZATION_SLUG`.
+  - Le slug s'obtient via `GET /v5/users/me/organizations`.
+  - Ne jamais commiter les identifiants.
+- **Parcours :**
+  - `HelloAssoGateway` crée un panier (checkout-intent) et redirige l'utilisateur vers HelloAsso ;
+  - au retour, `HelloAssoPaymentVerifier` interroge l'API. Le paramètre `code` du retour étant falsifiable, il n'est jamais pris en compte ;
+  - la validation exige une commande avec un paiement `Authorized` **et** un montant identique ;
+  - un refus ou une annulation fait échouer le paiement.
+- **Notifications :**
+  - URL à déclarer dans le back-office HelloAsso (Mon compte › Intégrations et API) : `https://<domaine>/webhooks/helloasso` ;
+  - pour une association, elles ne sont pas signées. Elles ne font donc que **déclencher une vérification via l'API** (job `VerifyHelloAssoPayment`, dédoublonné), sans jamais rien activer directement ;
+  - option : `HELLOASSO_WEBHOOK_IPS` restreint les adresses IP émettrices (documentation HelloAsso : production 51.138.206.200, test 4.233.135.234).
+- **Rapprochement :** `payments:reconcile`, toutes les 10 minutes, revérifie les paiements en attente, ce qui couvre une notification manquée (cas du poste local, injoignable depuis HelloAsso). Il marque comme abandonné un paiement sans autorisation après 2 heures.
+- **Achats commerciaux :** `PAYMENT_COMMERCIAL_GATEWAY=helloasso` les fait passer par HelloAsso, une fois leur éligibilité confirmée par le prestataire.
+
 ### Paramètres administrables
 
 Ils sont réglables dans Administration › Configuration › Paramètres. Les valeurs par défaut sont dans `config/campacity.php`, et la durée de mise en ligne reste à valider :
@@ -216,5 +246,5 @@ Ils sont réglables dans Administration › Configuration › Paramètres. Les v
 - [x] Phase 4 : recherche et territoires
 - [x] Phase 5 : modération et contact
 - [x] Phase 6 : partenaires et visibilité
-- [ ] Phase 7 : adhésions et paiements (HelloAsso)
+- [x] Phase 7 : adhésions et paiements (HelloAsso)
 - [ ] Phase 8 : finalisation

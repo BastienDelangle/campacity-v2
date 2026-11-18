@@ -105,6 +105,24 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
         return $this->hasMany(VisibilityPurchase::class);
     }
 
+    /**
+     * @return HasMany<Membership, $this>
+     */
+    public function memberships(): HasMany
+    {
+        return $this->hasMany(Membership::class);
+    }
+
+    public function currentMembership(): ?Membership
+    {
+        return $this->memberships()->current()->latest('ends_at')->first();
+    }
+
+    public function isMember(): bool
+    {
+        return $this->memberships()->current()->exists();
+    }
+
     public function isAnonymized(): bool
     {
         return $this->anonymized_at !== null;
