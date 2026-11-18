@@ -16,20 +16,37 @@
 
         <nav class="mx-auto hidden gap-5 xl:flex" aria-label="Navigation principale">
             @foreach ($nav as $item)
-                <a href="{{ $item['url'] }}" @class(['text-sm text-[#3e5548] hover:text-brand', 'font-extrabold text-brand underline underline-offset-8' => url()->current() === $item['url']])>{{ $item['label'] }}</a>
+                <a href="{{ $item['url'] }}" @class(['text-sm whitespace-nowrap text-[#3e5548] hover:text-brand', 'font-extrabold text-brand underline underline-offset-8' => url()->current() === $item['url']])>{{ $item['label'] }}</a>
             @endforeach
         </nav>
 
-        <div class="ml-auto hidden items-center gap-3 xl:flex">
-            <a href="{{ route('account.publications.create') }}" class="btn-primary">+ Publier</a>
+        <div class="ml-auto hidden shrink-0 items-center gap-3 xl:flex">
+            <a href="{{ route('account.publications.create') }}" class="btn-primary whitespace-nowrap">+ Publier</a>
             @auth
-                <a href="{{ route('account.dashboard') }}" class="btn-secondary">Mon espace</a>
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit" class="text-sm font-semibold text-muted hover:text-brand">Déconnexion</button>
-                </form>
+                <div class="relative" x-data="{ account: false }" @keydown.escape.window="account = false" @click.outside="account = false">
+                    <button type="button" class="btn-secondary whitespace-nowrap" @click="account = !account" :aria-expanded="account.toString()" aria-controls="menu-compte" aria-haspopup="true">
+                        Mon compte
+                        <svg class="h-4 w-4 transition" :class="account && 'rotate-180'" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/></svg>
+                    </button>
+                    <div id="menu-compte" x-cloak x-show="account" x-transition.origin.top.right
+                         class="absolute right-0 mt-2 w-60 overflow-hidden rounded-xl border border-line bg-white py-1 text-sm shadow-lg">
+                        <p class="truncate border-b border-line px-4 py-2 text-xs text-muted">{{ auth()->user()->name }}</p>
+                        <a href="{{ route('account.dashboard') }}" class="block px-4 py-2 hover:bg-cream">Mon espace</a>
+                        <a href="{{ route('account.publications.index') }}" class="block px-4 py-2 hover:bg-cream">Mes publications</a>
+                        <a href="{{ route('account.messages.index') }}" class="block px-4 py-2 hover:bg-cream">Mes messages</a>
+                        <a href="{{ route('account.membership') }}" class="block px-4 py-2 hover:bg-cream">Mon adhésion</a>
+                        <a href="{{ route('account.profile') }}" class="block px-4 py-2 hover:bg-cream">Mes informations</a>
+                        @can(\App\Enums\Permission::AccessAdmin->value)
+                            <a href="{{ url('/admin') }}" class="block px-4 py-2 hover:bg-cream">Administration</a>
+                        @endcan
+                        <form method="POST" action="{{ route('logout') }}" class="border-t border-line">
+                            @csrf
+                            <button type="submit" class="block w-full px-4 py-2 text-left font-semibold text-red-700 hover:bg-cream">Déconnexion</button>
+                        </form>
+                    </div>
+                </div>
             @else
-                <a href="{{ route('login') }}" class="text-sm font-semibold text-brand">Connexion</a>
+                <a href="{{ route('login') }}" class="text-sm font-semibold whitespace-nowrap text-brand">Connexion</a>
             @endauth
         </div>
 

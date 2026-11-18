@@ -217,6 +217,26 @@ class MembershipPaymentTest extends TestCase
         Http::assertSentCount(4); // 1 jeton + 1 création + 2 lectures
     }
 
+    public function test_checkout_is_retried_without_payer_when_helloasso_rejects_it(): void
+    {
+        $this->configureHelloAsso();
+        Http::fake(function ($request) {
+            if (str_ends_with($request->url(), '/oauth2/token')) {
+                return Http::response(['access_token' => 'tok', 'expires_in' => 1799]);
+            }
+
+            return isset($request['payer'])
+                ? Http::response(['errors' => [['code' => 'ArgumentInvalid', 'message' => 'Le champ prénom est invalide']]], 400)
+                : Http::response(['id' => 42, 'redirectUrl' => 'https://www.helloasso-sandbox.com/checkout/abc']);
+        });
+
+        $this->actingAs(User::factory()->create(['name' => 'Admin Campacity']))
+            ->post(route('account.membership.store'), ['terms' => '1'])
+            ->assertRedirect('https://www.helloasso-sandbox.com/checkout/abc');
+
+        $this->assertSame('42', Payment::sole()->provider_checkout_id);
+    }
+
     public function test_service_unavailable_shows_a_friendly_error(): void
     {
         $this->configureHelloAsso();

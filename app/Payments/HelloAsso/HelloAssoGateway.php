@@ -5,6 +5,8 @@ namespace App\Payments\HelloAsso;
 use App\Models\Payment;
 use App\Payments\Contracts\PaymentGateway;
 use App\Payments\PaymentStart;
+use Illuminate\Http\Client\RequestException;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 
@@ -38,7 +40,21 @@ class HelloAssoGateway implements PaymentGateway
             return new PaymentStart(redirectUrl: $metadata['redirect_url']);
         }
 
-        $intent = $this->client->createCheckoutIntent($this->payload($payment));
+        $payload = $this->payload($payment);
+
+        try {
+            $intent = $this->client->createCheckoutIntent($payload);
+        } catch (RequestException $exception) {
+            // HelloAsso valide strictement les données du payeur (ex. « Le champ prénom
+            // est invalide ») : elles ne sont qu'un pré-remplissage, on réessaie sans.
+            if ($exception->response->status() !== 400 || ! isset($payload['payer'])) {
+                throw $exception;
+            }
+
+            Log::info('HelloAsso : payeur refusé, panier recréé sans pré-remplissage', ['payment' => $payment->id, 'body' => $exception->response->json()]);
+            unset($payload['payer']);
+            $intent = $this->client->createCheckoutIntent($payload);
+        }
 
         $payment->forceFill([
             'provider_checkout_id' => (string) $intent['id'],
