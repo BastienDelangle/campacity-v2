@@ -30,6 +30,7 @@ class UsersTable
                     ->label('Rôles')
                     ->badge()
                     ->formatStateUsing(fn (string $state) => Role::tryFrom($state)?->label() ?? $state),
+                IconColumn::make('is_trusted')->label('Confiance')->boolean(),
                 TextColumn::make('organizations_count')->label('Organisations')->sortable(),
                 IconColumn::make('email_verified_at')->label('Vérifié')->boolean()->getStateUsing(fn (User $record) => $record->email_verified_at !== null),
                 TextColumn::make('anonymized_at')->label('Anonymisé le')->dateTime('d/m/Y')->toggleable(isToggledHiddenByDefault: true),
@@ -40,6 +41,7 @@ class UsersTable
                     ->label('Rôle')
                     ->relationship('roles', 'name')
                     ->getOptionLabelFromRecordUsing(fn (Model $record) => Role::tryFrom($record->name)?->label() ?? $record->name),
+                TernaryFilter::make('is_trusted')->label('Utilisateur de confiance'),
                 TernaryFilter::make('email_verified_at')->label('E-mail vérifié')->nullable(),
                 TernaryFilter::make('anonymized')
                     ->label('Comptes anonymisés')

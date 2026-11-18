@@ -3,12 +3,17 @@
 use App\Http\Controllers\Account\AccountController;
 use App\Http\Controllers\Account\OrganizationController as AccountOrganizationController;
 use App\Http\Controllers\Account\OrganizationMemberController;
+use App\Http\Controllers\Account\PublicationController as AccountPublicationController;
+use App\Http\Controllers\Account\PublicationStatusController;
 use App\Http\Controllers\OrganizationController;
+use App\Http\Controllers\PublicationController;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'home')->name('home');
 
 Route::get('/organisations/{organization}', [OrganizationController::class, 'show'])->name('organizations.show');
+Route::get('/annonces/{slug}', [PublicationController::class, 'show'])->name('publications.show');
+Route::get('/annonces/{publication}/documents/{attachment}', [PublicationController::class, 'attachment'])->name('publications.attachment');
 
 Route::middleware(['auth', 'verified'])->prefix('espace')->name('account.')->group(function () {
     Route::get('/', [AccountController::class, 'dashboard'])->name('dashboard');
@@ -19,6 +24,12 @@ Route::middleware(['auth', 'verified'])->prefix('espace')->name('account.')->gro
         ->parameters(['organisations' => 'organization'])
         ->names('organizations')
         ->except('show');
+
+    Route::resource('publications', AccountPublicationController::class)->except('show');
+    Route::get('/publications/{publication}/apercu', [AccountPublicationController::class, 'preview'])->name('publications.preview');
+    Route::post('/publications/{publication}/soumettre', [PublicationStatusController::class, 'submit'])->name('publications.submit');
+    Route::post('/publications/{publication}/archiver', [PublicationStatusController::class, 'archive'])->name('publications.archive');
+    Route::post('/publications/{publication}/renouveler', [PublicationStatusController::class, 'renew'])->name('publications.renew');
 
     Route::post('/organisations/{organization}/responsables', [OrganizationMemberController::class, 'store'])->name('organizations.members.store');
     Route::put('/organisations/{organization}/responsables/{member}', [OrganizationMemberController::class, 'update'])->name('organizations.members.update');

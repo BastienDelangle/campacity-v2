@@ -3,6 +3,10 @@
         <x-page-header :title="'Bonjour '.auth()->user()->name" kicker="Mon espace" />
 
         <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <a href="{{ route('account.publications.index') }}" class="card block p-6 hover:border-brand">
+                <h2 class="text-lg font-bold">Mes publications</h2>
+                <p class="mt-1 text-sm text-muted">{{ $publicationsCount ? trans_choice(':count publication|:count publications', $publicationsCount) : 'Publier une offre ou une demande.' }}</p>
+            </a>
             <a href="{{ route('account.organizations.index') }}" class="card block p-6 hover:border-brand">
                 <h2 class="text-lg font-bold">Mes organisations</h2>
                 <p class="mt-1 text-sm text-muted">{{ $organizationsCount ? trans_choice(':count organisation gérée|:count organisations gérées', $organizationsCount) : 'Créer la fiche de votre association, entreprise…' }}</p>

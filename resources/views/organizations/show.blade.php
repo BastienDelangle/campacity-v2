@@ -58,6 +58,19 @@
             </aside>
         </div>
 
+        <section class="mt-10" aria-labelledby="publications-titre">
+            <h2 id="publications-titre" class="text-xl font-bold">Publications en cours</h2>
+            @if ($publications->isEmpty())
+                <p class="mt-3 text-muted">Aucune publication en cours.</p>
+            @else
+                <div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    @foreach ($publications as $publication)
+                        <x-publication-card :publication="$publication" />
+                    @endforeach
+                </div>
+            @endif
+        </section>
+
         @can('update', $organization)
             <p class="mt-6"><a href="{{ route('account.organizations.edit', $organization) }}" class="btn-secondary">Modifier cette fiche</a></p>
         @endcan

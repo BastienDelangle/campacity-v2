@@ -16,6 +16,7 @@
         </nav>
 
         <div class="ml-auto hidden items-center gap-3 lg:flex">
+            <a href="{{ route('account.publications.create') }}" class="btn-primary">+ Publier</a>
             @auth
                 <a href="{{ route('account.dashboard') }}" class="btn-secondary">Mon espace</a>
                 <form method="POST" action="{{ route('logout') }}">
@@ -24,7 +25,6 @@
                 </form>
             @else
                 <a href="{{ route('login') }}" class="text-sm font-semibold text-brand">Connexion</a>
-                <a href="{{ route('register') }}" class="btn-primary">Créer un compte</a>
             @endauth
         </div>
 
@@ -39,6 +39,7 @@
             <a href="{{ $item['url'] }}" class="block py-2.5 text-sm font-semibold text-[#3e5548]">{{ $item['label'] }}</a>
         @endforeach
         <div class="mt-3 flex flex-wrap gap-3 border-t border-line pt-3">
+            <a href="{{ route('account.publications.create') }}" class="btn-primary">+ Publier</a>
             @auth
                 <a href="{{ route('account.dashboard') }}" class="btn-secondary">Mon espace</a>
                 <form method="POST" action="{{ route('logout') }}">

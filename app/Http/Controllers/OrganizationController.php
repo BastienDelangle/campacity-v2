@@ -14,6 +14,13 @@ class OrganizationController extends Controller
 
         $organization->load('commune.territory');
 
-        return view('organizations.show', compact('organization'));
+        $publications = $organization->publications()
+            ->publiclyVisible()
+            ->with(['type', 'category', 'commune', 'images'])
+            ->latest('published_at')
+            ->limit(12)
+            ->get();
+
+        return view('organizations.show', compact('organization', 'publications'));
     }
 }

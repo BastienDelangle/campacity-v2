@@ -12,11 +12,12 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable(['name', 'email', 'email_verified_at', 'password', 'phone', 'website', 'show_email', 'show_phone', 'show_website'])]
+#[Fillable(['name', 'email', 'email_verified_at', 'password', 'phone', 'website', 'show_email', 'show_phone', 'show_website', 'is_trusted'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable implements FilamentUser, MustVerifyEmail
 {
@@ -35,6 +36,7 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
             'show_phone' => 'boolean',
             'show_website' => 'boolean',
             'anonymized_at' => 'datetime',
+            'is_trusted' => 'boolean',
         ];
     }
 
@@ -56,6 +58,22 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
         return $this->belongsToMany(Organization::class)
             ->withPivot('role')
             ->withTimestamps();
+    }
+
+    /**
+     * @return HasMany<Publication, $this>
+     */
+    public function publications(): HasMany
+    {
+        return $this->hasMany(Publication::class);
+    }
+
+    /**
+     * Publie sans validation préalable : utilisateur de confiance ou modérateur.
+     */
+    public function canPublishWithoutModeration(): bool
+    {
+        return $this->is_trusted || $this->can(Permission::ModeratePublications->value);
     }
 
     public function isAnonymized(): bool

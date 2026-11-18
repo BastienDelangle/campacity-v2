@@ -45,6 +45,13 @@ class UserForm
                         Toggle::make('show_phone')->label('Téléphone public'),
                         Toggle::make('show_website')->label('Site public'),
                     ]),
+                Section::make('Modération')
+                    ->columnSpanFull()
+                    ->components([
+                        Toggle::make('is_trusted')
+                            ->label('Utilisateur de confiance')
+                            ->helperText('Ses publications sont mises en ligne sans validation préalable.'),
+                    ]),
                 Section::make('Rôles')
                     ->columnSpanFull()
                     ->visible(fn (?Model $record) => auth()->user()->can('assignRoles', $record ?? new User))

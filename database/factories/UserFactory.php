@@ -35,6 +35,8 @@ class UserFactory extends Factory
             'show_email' => false,
             'show_phone' => false,
             'show_website' => true,
+            'is_trusted' => false,
+            'anonymized_at' => null,
         ];
     }
 

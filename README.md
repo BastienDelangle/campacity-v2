@@ -31,7 +31,7 @@ mysql -uroot -h127.0.0.1 -e "CREATE DATABASE campacity CHARACTER SET utf8mb4 COL
                              CREATE DATABASE campacity_testing CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 
 composer setup            # install, .env, clé, migrations, build front
-php artisan db:seed       # rôles et permissions (+ données de démo en local)
+php artisan db:seed       # rôles, permissions, types et catégories initiaux (+ démo en local)
 php artisan storage:link  # accès public aux fichiers envoyés (logos, images)
 herd secure campacity     # HTTPS local
 ```
@@ -95,18 +95,40 @@ Une application Laravel monolithique, organisée par domaine fonctionnel :
   - le logo est stocké sur le disque `public` (JPG, PNG ou WebP, 2 Mo maximum, SVG refusé). Pensez à lancer `php artisan storage:link`.
 - **Territoires et communes :** gérés dans l'administration (rubrique « Référentiels »). Le territoire d'une organisation est déduit de sa commune.
 
+### Publications
+
+- **Trois axes indépendants :** le type (table `publication_types`, administrable ; un type « événement » active les champs date, lieu, programme et inscription), la nature (offre ou demande) et l'origine (urbain, rural, entre les deux). La catégorie est une table `categories` à un niveau de sous-catégories.
+- **Cycle de vie (`App\Actions\Publications\PublicationLifecycle`) :**
+  - brouillon → aperçu → soumission ;
+  - à la soumission, la publication part en attente de modération, ou paraît directement si l'auteur est « de confiance » ou modérateur ;
+  - une modification sensible d'une publication en ligne la renvoie en modération, si le paramètre est actif ;
+  - l'auteur peut archiver ou renouveler sa publication. Une page archivée, expirée ou supprimée répond 410.
+- **Tâche planifiée `publications:process-lifecycle` (toutes les heures) :** archivage des événements terminés, passage en « expirée » des publications échues et rappel par e-mail avant expiration (envoyé une seule fois).
+- **Localisation :** la précision affichée publiquement est choisie par l'auteur (commune uniquement, position approximative ≈ 1 km, adresse exacte). `Publication::publicCoordinates()` ne renvoie jamais une position plus précise que ce choix.
+- **Fichiers :**
+  - les images sont redimensionnées (1 600 px de large maximum), ré-encodées en WebP et débarrassées de leurs métadonnées EXIF (GD natif, sans dépendance) ;
+  - les documents sont stockés sur le disque privé et servis seulement si la publication est consultable.
+
+### Paramètres administrables
+
+Ils sont réglables dans Administration › Configuration › Paramètres. Les valeurs par défaut sont dans `config/campacity.php`, et la durée de mise en ligne reste à valider :
+- durée de mise en ligne ;
+- délai du rappel avant expiration ;
+- nombre maximal d'images et de documents ;
+- re-modération après une modification sensible.
+
 ### Rôles et permissions
 
 - Les rôles (`admin`, `moderator`, `user`) et les permissions (`App\Enums\Permission`) sont stockés en base.
 - `RolesAndPermissionsSeeder` est idempotent : il crée ce qui manque sans écraser les ajustements faits ensuite.
-- L'administrateur passe tous les contrôles (`Gate::before`).
+- Le rôle administrateur reçoit toutes les permissions à chaque exécution du seeder, y compris les nouvelles. Les garde-fous métier, comme l'interdiction de modifier ses propres rôles ou de supprimer une catégorie utilisée, s'appliquent aussi à lui.
 - L'accès à `/admin` exige la permission `admin.access` et une adresse e-mail vérifiée.
 
 ## Avancement
 
 - [x] Phase 1 : socle technique (Laravel, MySQL, Herd, Filament, authentification, rôles et permissions)
 - [x] Phase 2 : comptes et organisations
-- [ ] Phase 3 : publications
+- [x] Phase 3 : publications
 - [ ] Phase 4 : recherche et territoires
 - [ ] Phase 5 : modération et contact
 - [ ] Phase 6 : partenaires et visibilité
