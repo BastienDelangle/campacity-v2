@@ -20,9 +20,8 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
      */
     public function update(User $user, array $input): void
     {
-        Validator::make($input, [
+        $validated = Validator::make($input, [
             'name' => ['required', 'string', 'max:255'],
-
             'email' => [
                 'required',
                 'string',
@@ -30,32 +29,36 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
                 'max:255',
                 Rule::unique('users')->ignore($user->id),
             ],
+            'phone' => ['nullable', 'string', 'max:30', 'regex:/^[0-9+().\s-]{6,30}$/'],
+            'website' => ['nullable', 'url:http,https', 'max:255'],
+            'show_email' => ['boolean'],
+            'show_phone' => ['boolean'],
+            'show_website' => ['boolean'],
+        ], attributes: [
+            'show_email' => 'afficher l\'e-mail',
+            'show_phone' => 'afficher le téléphone',
+            'show_website' => 'afficher le site',
         ])->validateWithBag('updateProfileInformation');
 
-        if ($input['email'] !== $user->email &&
-            $user instanceof MustVerifyEmail) {
-            $this->updateVerifiedUser($user, $input);
-        } else {
-            $user->forceFill([
-                'name' => $input['name'],
-                'email' => $input['email'],
-            ])->save();
-        }
-    }
+        $emailChanged = $validated['email'] !== $user->email;
 
-    /**
-     * Update the given verified user's profile information.
-     *
-     * @param  array<string, string>  $input
-     */
-    protected function updateVerifiedUser(User $user, array $input): void
-    {
         $user->forceFill([
-            'name' => $input['name'],
-            'email' => $input['email'],
-            'email_verified_at' => null,
-        ])->save();
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'phone' => $validated['phone'] ?? null,
+            'website' => $validated['website'] ?? null,
+            'show_email' => (bool) ($validated['show_email'] ?? false),
+            'show_phone' => (bool) ($validated['show_phone'] ?? false),
+            'show_website' => (bool) ($validated['show_website'] ?? false),
+        ]);
 
-        $user->sendEmailVerificationNotification();
+        if ($emailChanged && $user instanceof MustVerifyEmail) {
+            $user->forceFill(['email_verified_at' => null])->save();
+            $user->sendEmailVerificationNotification();
+
+            return;
+        }
+
+        $user->save();
     }
 }

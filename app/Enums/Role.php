@@ -2,15 +2,22 @@
 
 namespace App\Enums;
 
+use Filament\Support\Contracts\HasLabel;
+
 /**
  * Rôles de base de la plateforme. Les permissions associées sont en base
  * (spatie/laravel-permission) et peuvent évoluer sans modifier le code.
  */
-enum Role: string
+enum Role: string implements HasLabel
 {
     case Admin = 'admin';
     case Moderator = 'moderator';
     case User = 'user';
+
+    public function getLabel(): string
+    {
+        return $this->label();
+    }
 
     public function label(): string
     {

@@ -31,7 +31,8 @@ mysql -uroot -h127.0.0.1 -e "CREATE DATABASE campacity CHARACTER SET utf8mb4 COL
                              CREATE DATABASE campacity_testing CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 
 composer setup            # install, .env, clé, migrations, build front
-php artisan db:seed       # rôles et permissions (+ comptes de démo en local)
+php artisan db:seed       # rôles et permissions (+ données de démo en local)
+php artisan storage:link  # accès public aux fichiers envoyés (logos, images)
 herd secure campacity     # HTTPS local
 ```
 
@@ -84,6 +85,16 @@ Une application Laravel monolithique, organisée par domaine fonctionnel :
 - `app/Filament` : back-office (ressources, pages, widgets).
 - `resources/views/components` : composants Blade réutilisables. Les jetons de design de la maquette V1 sont dans `resources/css/app.css` (`@theme`), pour faciliter l'intégration de la future maquette.
 
+### Comptes et organisations
+
+- **Profil :** coordonnées (téléphone, site) et choix de ce qui est visible publiquement (`show_email`, `show_phone`, `show_website`). Par défaut, l'e-mail et le téléphone restent privés.
+- **Suppression de compte :** elle se fait par anonymisation (`App\Actions\Users\AnonymizeUser`). Les données personnelles sont effacées, mais la ligne est conservée pour les historiques soumis à obligation de conservation. Un propriétaire unique d'une organisation partagée doit d'abord désigner un autre propriétaire.
+- **Organisations :**
+  - fiche publique sur `/organisations/{slug}` ; le slug ne change pas en cas de renommage, pour préserver les URLs ;
+  - responsables : `owner` (gère la fiche et les responsables) ou `editor` (gère la fiche). Il reste toujours au moins un propriétaire (`ManageOrganizationMembers`) ;
+  - le logo est stocké sur le disque `public` (JPG, PNG ou WebP, 2 Mo maximum, SVG refusé). Pensez à lancer `php artisan storage:link`.
+- **Territoires et communes :** gérés dans l'administration (rubrique « Référentiels »). Le territoire d'une organisation est déduit de sa commune.
+
 ### Rôles et permissions
 
 - Les rôles (`admin`, `moderator`, `user`) et les permissions (`App\Enums\Permission`) sont stockés en base.
@@ -94,7 +105,7 @@ Une application Laravel monolithique, organisée par domaine fonctionnel :
 ## Avancement
 
 - [x] Phase 1 : socle technique (Laravel, MySQL, Herd, Filament, authentification, rôles et permissions)
-- [ ] Phase 2 : comptes et organisations
+- [x] Phase 2 : comptes et organisations
 - [ ] Phase 3 : publications
 - [ ] Phase 4 : recherche et territoires
 - [ ] Phase 5 : modération et contact

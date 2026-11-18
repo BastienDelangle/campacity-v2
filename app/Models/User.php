@@ -11,11 +11,12 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable(['name', 'email', 'password'])]
+#[Fillable(['name', 'email', 'email_verified_at', 'password', 'phone', 'website', 'show_email', 'show_phone', 'show_website'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable implements FilamentUser, MustVerifyEmail
 {
@@ -30,6 +31,10 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'show_email' => 'boolean',
+            'show_phone' => 'boolean',
+            'show_website' => 'boolean',
+            'anonymized_at' => 'datetime',
         ];
     }
 
@@ -41,5 +46,35 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
     public function isAdmin(): bool
     {
         return $this->hasRole(Role::Admin->value);
+    }
+
+    /**
+     * @return BelongsToMany<Organization, $this>
+     */
+    public function organizations(): BelongsToMany
+    {
+        return $this->belongsToMany(Organization::class)
+            ->withPivot('role')
+            ->withTimestamps();
+    }
+
+    public function isAnonymized(): bool
+    {
+        return $this->anonymized_at !== null;
+    }
+
+    public function publicEmail(): ?string
+    {
+        return $this->show_email ? $this->email : null;
+    }
+
+    public function publicPhone(): ?string
+    {
+        return $this->show_phone ? $this->phone : null;
+    }
+
+    public function publicWebsite(): ?string
+    {
+        return $this->show_website ? $this->website : null;
     }
 }
