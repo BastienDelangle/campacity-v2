@@ -7,7 +7,7 @@
             <button type="submit" class="btn-primary">Rechercher</button>
         </div>
 
-        <div class="mt-4 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
+        <div class="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-7">
             <div>
                 <label for="f-categorie" class="mb-1 block text-xs font-bold text-[#58685b]">Catégorie</label>
                 <select id="f-categorie" wire:model.live="category" class="form-input py-2 text-sm">
@@ -54,6 +54,14 @@
                     </select>
                 </div>
             @endif
+
+            <div>
+                <label for="f-visibilite" class="mb-1 block text-xs font-bold text-[#58685b]">Visibilité</label>
+                <select id="f-visibilite" wire:model.live="visibility" class="form-input py-2 text-sm">
+                    <option value="">Toutes</option>
+                    <option value="mises-en-avant">Mises en avant</option>
+                </select>
+            </div>
 
             @if ($this->territories->count() > 1)
                 <div>
@@ -120,7 +128,7 @@
                  role="region" aria-label="Carte des publications">
                 <div x-ref="map" class="h-full w-full"></div>
             </div>
-            <p class="mt-2 text-xs text-muted">Les positions affichées respectent le niveau de précision choisi par chaque auteur. Les publications sans localisation ne figurent pas sur la carte.</p>
+            <p class="mt-2 text-xs text-muted"><span class="inline-block h-2.5 w-2.5 rounded-full bg-featured align-middle"></span> publication mise en avant · Les positions affichées respectent le niveau de précision choisi par chaque auteur. Les publications sans localisation ne figurent pas sur la carte.</p>
         </div>
     @else
         <div wire:key="list-view">

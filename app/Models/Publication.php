@@ -6,6 +6,7 @@ use App\Enums\LocationPrecision;
 use App\Enums\PublicationNature;
 use App\Enums\PublicationOrigin;
 use App\Enums\PublicationStatus;
+use App\Enums\VisibilityKind;
 use App\Models\Concerns\HasUniqueSlug;
 use Database\Factories\PublicationFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -128,6 +129,54 @@ class Publication extends Model
     public function attachments(): HasMany
     {
         return $this->hasMany(PublicationAttachment::class);
+    }
+
+    /**
+     * @return HasMany<VisibilityPurchase, $this>
+     */
+    public function visibilityPurchases(): HasMany
+    {
+        return $this->hasMany(VisibilityPurchase::class);
+    }
+
+    /**
+     * Offre de visibilité en cours la plus forte (boost > mise en avant).
+     *
+     * @return HasOne<VisibilityPurchase, $this>
+     */
+    public function activeVisibility(): HasOne
+    {
+        return $this->hasOne(VisibilityPurchase::class)->ofMany(
+            ['ranking_weight' => 'max', 'id' => 'max'],
+            fn (Builder $query) => $query->currentlyActive(),
+        );
+    }
+
+    /**
+     * Ajoute la colonne `visibility_rank` (0 si aucune offre active), pour trier.
+     *
+     * @param  Builder<self>  $query
+     */
+    public function scopeWithVisibilityRank(Builder $query): void
+    {
+        $query->addSelect(['visibility_rank' => VisibilityPurchase::query()
+            ->selectRaw('COALESCE(MAX(ranking_weight), 0)')
+            ->whereColumn('visibility_purchases.publication_id', 'publications.id')
+            ->currentlyActive(),
+        ]);
+    }
+
+    /**
+     * @param  Builder<self>  $query
+     */
+    public function scopePromoted(Builder $query): void
+    {
+        $query->whereHas('visibilityPurchases', fn (Builder $q) => $q->currentlyActive());
+    }
+
+    public function visibilityKind(): ?VisibilityKind
+    {
+        return $this->activeVisibility?->kind;
     }
 
     /**

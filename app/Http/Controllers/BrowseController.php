@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\PublicationOrigin;
+use App\Models\PartnerProfile;
 use App\Models\Publication;
 use App\Queries\PublicationSearch;
 use Illuminate\View\View;
@@ -41,7 +42,7 @@ class BrowseController extends Controller
     public function home(): View
     {
         $latest = (new PublicationSearch)->query()
-            ->with(['type', 'category', 'commune', 'images'])
+            ->with(['type', 'category', 'commune', 'images', 'activeVisibility'])
             ->limit(6)
             ->get();
 
@@ -55,7 +56,16 @@ class BrowseController extends Controller
             ->groupBy('origin')
             ->pluck('total', 'origin');
 
+        $partners = PartnerProfile::visible()
+            ->where('show_on_home', true)
+            ->with('organization.commune')
+            // Rotation équitable entre partenaires.
+            ->inRandomOrder()
+            ->limit(3)
+            ->get();
+
         return view('home', [
+            'partners' => $partners,
             'latest' => $latest,
             'upcoming' => $upcoming,
             'urbanCount' => (int) ($counts[PublicationOrigin::Urban->value] ?? 0) + (int) ($counts[PublicationOrigin::Both->value] ?? 0),

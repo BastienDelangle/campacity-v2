@@ -31,6 +31,7 @@ class PublicationSearch
         public readonly ?int $communeId = null,
         public readonly array $typeSlugs = [],
         public readonly bool $agenda = false,
+        public readonly bool $promotedOnly = false,
         public readonly string $sort = 'recent',
     ) {}
 
@@ -39,7 +40,11 @@ class PublicationSearch
      */
     public function query(): Builder
     {
-        $query = Publication::query()->publiclyVisible();
+        $query = Publication::query()->select('publications.*')->withVisibilityRank()->publiclyVisible();
+
+        if ($this->promotedOnly) {
+            $query->promoted();
+        }
 
         $this->applyText($query);
 
@@ -124,13 +129,17 @@ class PublicationSearch
     {
         $sort = in_array($this->sort, self::SORTS, true) ? $this->sort : 'recent';
 
+        // Les publications boostées puis mises en avant passent devant (sauf agenda chronologique).
+        if ($sort !== 'upcoming') {
+            $query->orderByDesc('visibility_rank');
+        }
+
         if ($sort === 'relevance' && ($fullText = $this->booleanFullTextQuery((string) $this->text)) !== '') {
             $query->orderByRaw('MATCH(title, description) AGAINST (? IN BOOLEAN MODE) DESC', [$fullText]);
         }
 
         if ($sort === 'upcoming') {
             $query->leftJoin('publication_events', 'publication_events.publication_id', '=', 'publications.id')
-                ->select('publications.*')
                 ->orderByRaw('publication_events.starts_at IS NULL')
                 ->orderBy('publication_events.starts_at');
         }

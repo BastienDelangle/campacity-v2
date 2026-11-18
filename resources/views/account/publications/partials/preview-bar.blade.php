@@ -26,6 +26,9 @@
             @if (in_array($status, [\App\Enums\PublicationStatus::Draft, \App\Enums\PublicationStatus::Rejected], true))
                 <form method="POST" action="{{ route('account.publications.submit', $publication) }}">@csrf<button type="submit" class="btn-primary px-4 py-2">Soumettre</button></form>
             @endif
+            @if ($status === \App\Enums\PublicationStatus::Published && $publication->isPubliclyVisible())
+                <a href="{{ route('account.publications.visibility.create', $publication) }}" class="btn-secondary px-4 py-2">★ Mettre en avant</a>
+            @endif
             @if ($canRenew ?? false)
                 <form method="POST" action="{{ route('account.publications.renew', $publication) }}">@csrf<button type="submit" class="btn-primary px-4 py-2">{{ $status === \App\Enums\PublicationStatus::Published ? 'Prolonger' : 'Remettre en ligne' }}</button></form>
             @endif

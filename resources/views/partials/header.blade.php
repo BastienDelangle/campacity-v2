@@ -5,6 +5,7 @@
         ['label' => 'Côté rural', 'url' => route('browse.rural')],
         ['label' => 'Toutes les annonces', 'url' => route('publications.index')],
         ['label' => 'Formations & rendez-vous', 'url' => route('browse.agenda')],
+        ['label' => 'Partenaires premium', 'url' => route('partners.index')],
     ];
 @endphp
 <header x-data="{ open: false }" class="sticky top-0 z-40 border-b border-line bg-white">

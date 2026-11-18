@@ -19,6 +19,9 @@
             <x-organization-logo :organization="$organization" class="h-24 w-24 text-4xl" />
             <div>
                 <span class="tag">{{ $organization->type->label() }}</span>
+                @if ($organization->partnerProfile?->isVisible())
+                    <a href="{{ route('partners.show', $organization) }}" class="ml-1 inline-block rounded-full bg-[#f2dca9] px-2.5 py-1 text-[11px] font-extrabold text-[#62481e]">✦ Partenaire premium — voir la vitrine</a>
+                @endif
                 <h1 class="mt-2 text-3xl font-extrabold tracking-tight text-brand sm:text-4xl">{{ $organization->name }}</h1>
                 @if ($organization->commune)
                     <p class="mt-1 text-muted">{{ $organization->commune->displayName() }}@if($organization->commune->territory) · {{ $organization->commune->territory->name }}@endif</p>

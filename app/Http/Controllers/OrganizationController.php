@@ -12,11 +12,11 @@ class OrganizationController extends Controller
     {
         Gate::authorize('view', $organization);
 
-        $organization->load('commune.territory');
+        $organization->load(['commune.territory', 'partnerProfile']);
 
         $publications = $organization->publications()
             ->publiclyVisible()
-            ->with(['type', 'category', 'commune', 'images'])
+            ->with(['type', 'category', 'commune', 'images', 'activeVisibility'])
             ->latest('published_at')
             ->limit(12)
             ->get();

@@ -71,7 +71,7 @@ class PublicationController extends Controller
     {
         Gate::authorize('manage', $publication);
 
-        $publication->load(['type', 'category.parent', 'commune.territory', 'organization', 'author', 'event', 'images', 'attachments']);
+        $publication->load(['type', 'category.parent', 'commune.territory', 'organization', 'author', 'event', 'images', 'attachments', 'activeVisibility']);
 
         return view('publications.show', [
             'publication' => $publication,

@@ -31,6 +31,9 @@
         <div class="mt-4 grid gap-8 lg:grid-cols-[2fr_1fr]">
             <article>
                 <div class="flex flex-wrap gap-2">
+                    @if ($kind = $publication->visibilityKind())
+                        <span @class(['rounded-full px-2.5 py-1.5 text-[11px] font-extrabold uppercase', 'bg-[#f7dfac] text-[#704c14]' => $kind === \App\Enums\VisibilityKind::Featured, 'bg-accent text-white' => $kind === \App\Enums\VisibilityKind::Boost])>★ {{ $kind->badge() }}</span>
+                    @endif
                     <span class="tag">{{ $publication->type->name }}</span>
                     <span class="tag">{{ $publication->nature->label() }}</span>
                     <span class="tag">{{ $publication->origin->label() }}</span>

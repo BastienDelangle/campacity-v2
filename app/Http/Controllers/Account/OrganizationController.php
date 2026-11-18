@@ -47,7 +47,7 @@ class OrganizationController extends Controller
     {
         Gate::authorize('update', $organization);
 
-        $organization->load(['commune', 'members' => fn ($query) => $query->orderBy('name')]);
+        $organization->load(['commune', 'partnerProfile', 'members' => fn ($query) => $query->orderBy('name')]);
 
         return view('account.organizations.form', [
             'organization' => $organization,

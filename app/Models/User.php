@@ -97,6 +97,14 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
         return $this->hasMany(ContactMessage::class, 'recipient_id');
     }
 
+    /**
+     * @return HasMany<VisibilityPurchase, $this>
+     */
+    public function visibilityPurchases(): HasMany
+    {
+        return $this->hasMany(VisibilityPurchase::class);
+    }
+
     public function isAnonymized(): bool
     {
         return $this->anonymized_at !== null;

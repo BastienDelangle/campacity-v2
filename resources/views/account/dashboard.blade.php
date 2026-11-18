@@ -15,6 +15,10 @@
                 <h2 class="text-lg font-bold">Mes organisations</h2>
                 <p class="mt-1 text-sm text-muted">{{ $organizationsCount ? trans_choice(':count organisation gérée|:count organisations gérées', $organizationsCount) : 'Créer la fiche de votre association, entreprise…' }}</p>
             </a>
+            <a href="{{ route('account.purchases.index') }}" class="card block p-6 hover:border-brand">
+                <h2 class="text-lg font-bold">Mes achats</h2>
+                <p class="mt-1 text-sm text-muted">Mises en avant, vitrines partenaires et paiements.</p>
+            </a>
             <a href="{{ route('account.profile') }}" class="card block p-6 hover:border-brand">
                 <h2 class="text-lg font-bold">Mes informations</h2>
                 <p class="mt-1 text-sm text-muted">Profil, coordonnées visibles, mot de passe.</p>

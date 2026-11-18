@@ -21,6 +21,12 @@ class AdminResourcesAccessTest extends TestCase
     #[TestWith(['/admin/organizations'])]
     #[TestWith(['/admin/territories'])]
     #[TestWith(['/admin/communes'])]
+    #[TestWith(['/admin/visibility-products'])]
+    #[TestWith(['/admin/visibility-purchases'])]
+    #[TestWith(['/admin/payments'])]
+    #[TestWith(['/admin/partner-profiles'])]
+    #[TestWith(['/admin/partner-profiles/create'])]
+    #[TestWith(['/admin/publication-reports'])]
     public function test_admin_can_list_resources(string $url): void
     {
         $admin = User::factory()->create()->assignRole(Role::Admin->value);
@@ -31,6 +37,9 @@ class AdminResourcesAccessTest extends TestCase
     #[TestWith(['/admin/users'])]
     #[TestWith(['/admin/organizations'])]
     #[TestWith(['/admin/territories'])]
+    #[TestWith(['/admin/payments'])]
+    #[TestWith(['/admin/partner-profiles'])]
+    #[TestWith(['/admin/visibility-products'])]
     public function test_moderator_cannot_access_management_resources(string $url): void
     {
         $moderator = User::factory()->create()->assignRole(Role::Moderator->value);

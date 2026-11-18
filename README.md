@@ -167,6 +167,32 @@ php artisan campacity:import-communes "Nom du territoire" --insee=50147 --insee=
 
 > Les e-mails passent par la file d'attente : en local, lancer `php artisan queue:work` (ou `composer dev`) pour qu'ils partent ; ils sont écrits dans `storage/logs/laravel.log` avec `MAIL_MAILER=log`.
 
+### Visibilité commerciale et partenaires premium
+
+- **Offres (`visibility_products`) :** mise en avant, boost et partenaire premium. Prix, durée, poids de tri et activation sont administrables (Administration › Commercial). Les prix initiaux sont ceux, **indicatifs**, de la maquette.
+  - « Booster » n'a pas de règle propre en dehors de son poids de tri plus élevé et de son badge, puisque ses règles restent à définir.
+- **Achats (`visibility_purchases`) :** le produit, le montant, la durée et le poids sont figés au moment de l'achat. Statuts : en attente de paiement → active → terminée, ou annulée.
+  - **L'activation dépend uniquement de la confirmation du paiement** (événement `PaymentSucceeded` → `ActivatePaidVisibilityPurchase`).
+  - Un nouvel achat du même type démarre à la fin de l'offre en cours.
+  - La visibilité cesse exactement à `ends_at` ; la tâche `visibility:expire` (toutes les heures) met ensuite le statut à jour.
+- **Affichage :**
+  - les publications boostées puis mises en avant passent devant dans les listes ;
+  - elles portent un badge distinct sur les cartes et les fiches, et un repère doré sur la carte ;
+  - un filtre « Mises en avant » est disponible.
+- **Partenaire premium (`partner_profiles`) :** entité distincte de l'organisation, avec une période de visibilité.
+  - **Pages :** vitrine `/partenaires/{slug}`, annuaire `/partenaires`, bandeau sur l'accueil (rotation aléatoire), page des offres `/offres-de-visibilite`.
+  - **Souscription :** par un propriétaire de l'organisation. Le contenu de la vitrine est modifiable par ses responsables.
+  - **Administration :** l'admin peut aussi fixer une période à la main, par exemple pour un partenariat hors offre payante.
+
+### Paiements
+
+- **Couche indépendante du métier :**
+  - la table `payments` est polymorphe ;
+  - `App\Payments\PaymentManager` est le point d'entrée unique, avec des transitions idempotentes ;
+  - chaque prestataire implémente l'interface `App\Payments\Contracts\PaymentGateway` (`config/payments.php`).
+- **Prestataire `manual` :** virement ou chèque, avec les instructions définies par `PAYMENT_MANUAL_INSTRUCTIONS`. L'acheteur reçoit une référence `CAMP-{id}` ; l'administrateur confirme la réception dans Commercial › Achats › « Paiement reçu », ce qui active l'offre et envoie l'e-mail de confirmation.
+- **Choix du prestataire :** `PAYMENT_COMMERCIAL_GATEWAY` fixe celui des achats commerciaux (`manual` par défaut, puisque l'éligibilité de HelloAsso n'est pas acquise). HelloAsso arrive en phase 7.
+
 ### Paramètres administrables
 
 Ils sont réglables dans Administration › Configuration › Paramètres. Les valeurs par défaut sont dans `config/campacity.php`, et la durée de mise en ligne reste à valider :
@@ -189,6 +215,6 @@ Ils sont réglables dans Administration › Configuration › Paramètres. Les v
 - [x] Phase 3 : publications
 - [x] Phase 4 : recherche et territoires
 - [x] Phase 5 : modération et contact
-- [ ] Phase 6 : partenaires et visibilité
+- [x] Phase 6 : partenaires et visibilité
 - [ ] Phase 7 : adhésions et paiements (HelloAsso)
 - [ ] Phase 8 : finalisation

@@ -2,9 +2,11 @@
 
 namespace App\Providers;
 
+use App\Models\VisibilityPurchase;
 use App\Support\Settings;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
@@ -23,6 +25,11 @@ class AppServiceProvider extends ServiceProvider
     {
         // Détecte en dev le lazy loading (N+1), les attributs inexistants, etc.
         Model::shouldBeStrict(! $this->app->isProduction());
+
+        // Noms stables pour les relations polymorphes des paiements.
+        Relation::morphMap([
+            'visibility_purchase' => VisibilityPurchase::class,
+        ]);
 
         Route::resourceVerbs(['create' => 'creer', 'edit' => 'modifier']);
 

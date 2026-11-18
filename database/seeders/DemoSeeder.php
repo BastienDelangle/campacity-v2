@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Actions\Visibility\VisibilityPurchases;
 use App\Enums\OrganizationType;
 use App\Enums\PublicationNature;
 use App\Enums\PublicationOrigin;
@@ -14,6 +15,9 @@ use App\Models\Publication;
 use App\Models\PublicationType;
 use App\Models\Territory;
 use App\Models\User;
+use App\Models\VisibilityProduct;
+use App\Models\VisibilityPurchase;
+use App\Payments\PaymentManager;
 use Illuminate\Database\Seeder;
 
 /**
@@ -67,6 +71,38 @@ class DemoSeeder extends Seeder
         }
 
         $this->seedPublications();
+        $this->seedVisibility();
+    }
+
+    /**
+     * Une publication mise en avant et un partenaire premium, activés par un
+     * paiement manuel confirmé (même chemin que la production).
+     */
+    private function seedVisibility(): void
+    {
+        if (VisibilityPurchase::exists()) {
+            return;
+        }
+
+        $buyer = User::where('email', 'utilisateur@campacity.test')->first();
+        $purchases = app(VisibilityPurchases::class);
+        $payments = app(PaymentManager::class);
+
+        $publication = Publication::where('title', 'like', '[Démo] Gîte%')->first();
+        if ($publication?->isPubliclyVisible()) {
+            $purchase = $purchases->orderForPublication($buyer, VisibilityProduct::where('slug', 'mettre-en-avant')->firstOrFail(), $publication);
+            $payments->markSucceeded($purchase->latestPayment(), 'demo-featured');
+        }
+
+        $organization = Organization::where('slug', 'association-demo')->first();
+        if ($organization) {
+            $purchase = $purchases->orderPremium($buyer, VisibilityProduct::where('slug', 'partenaire-premium')->firstOrFail(), $organization);
+            $organization->partnerProfile->update([
+                'headline' => '[Démo] Vitrine partenaire de démonstration',
+                'activity' => 'Association fictive',
+            ]);
+            $payments->markSucceeded($purchase->latestPayment(), 'demo-premium');
+        }
     }
 
     /**

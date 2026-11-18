@@ -80,6 +80,20 @@
         </form>
 
         @if ($editing)
+            <section class="card mt-6 flex flex-col justify-between gap-4 p-6 sm:flex-row sm:items-center" aria-labelledby="premium">
+                <div>
+                    <h2 id="premium" class="text-lg font-bold">✦ Partenaire premium</h2>
+                    <p class="mt-1 text-sm text-muted">
+                        @if ($organization->partnerProfile?->isVisible())
+                            Vitrine en ligne jusqu'au {{ $organization->partnerProfile->visible_until?->translatedFormat('j F Y') ?? '—' }}.
+                        @else
+                            Une vitrine dédiée dans l'annuaire des partenaires et sur l'accueil.
+                        @endif
+                    </p>
+                </div>
+                <a href="{{ route('account.organizations.partner.edit', $organization) }}" class="btn-secondary shrink-0">Gérer</a>
+            </section>
+
             @include('account.organizations.partials.members')
 
             @can('delete', $organization)

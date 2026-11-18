@@ -33,6 +33,23 @@
             </div>
         </section>
 
+        @if ($partners->isNotEmpty())
+            <section class="mt-10 rounded-3xl border border-[#e2dfca] bg-white p-6" aria-labelledby="partenaires">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                        <span class="inline-block rounded-full bg-[#f2dca9] px-2.5 py-1 text-[11px] font-extrabold text-[#62481e]">✦ Partenaires premium</span>
+                        <h2 id="partenaires" class="mt-2 text-2xl font-extrabold">Ils font avancer les coopérations</h2>
+                    </div>
+                    <a href="{{ route('partners.index') }}" class="font-bold text-brand">Tous les partenaires →</a>
+                </div>
+                <div class="mt-5 grid gap-3 md:grid-cols-3">
+                    @foreach ($partners as $profile)
+                        <x-partner-card :profile="$profile" />
+                    @endforeach
+                </div>
+            </section>
+        @endif
+
         <section class="pt-12" aria-labelledby="dernieres">
             <div class="flex flex-wrap items-end justify-between gap-3">
                 <h2 id="dernieres" class="text-2xl font-extrabold tracking-tight">Dernières publications</h2>

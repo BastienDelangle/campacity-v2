@@ -54,6 +54,9 @@ class PublicationBrowser extends Component
     #[Url(as: 'type', except: '')]
     public string $type = '';
 
+    #[Url(as: 'visibilite', except: '')]
+    public string $visibility = '';
+
     #[Url(as: 'tri', except: '')]
     public string $sort = '';
 
@@ -83,7 +86,7 @@ class PublicationBrowser extends Component
 
     public function resetFilters(): void
     {
-        $this->reset(['search', 'category', 'origin', 'nature', 'territory', 'commune', 'type', 'sort']);
+        $this->reset(['search', 'category', 'origin', 'nature', 'territory', 'commune', 'type', 'visibility', 'sort']);
         $this->resetPage();
 
         if ($this->view === 'carte') {
@@ -111,6 +114,7 @@ class PublicationBrowser extends Component
             communeId: ctype_digit($this->commune) ? (int) $this->commune : null,
             typeSlugs: $this->type !== '' ? [$this->type] : [],
             agenda: $this->preset === 'agenda',
+            promotedOnly: $this->visibility === 'mises-en-avant',
             sort: $sort,
         );
     }
@@ -122,14 +126,14 @@ class PublicationBrowser extends Component
     public function publications(): LengthAwarePaginator
     {
         return $this->searchQuery()->query()
-            ->with(['type', 'category', 'commune', 'images', 'event'])
+            ->with(['type', 'category', 'commune', 'images', 'event', 'activeVisibility'])
             ->paginate(12);
     }
 
     /**
      * Repères de la carte : mêmes filtres que la liste, coordonnées publiques uniquement.
      *
-     * @return list<array{id: int, title: string, url: string, category: string, commune: ?string, lat: float, lng: float}>
+     * @return list<array{id: int, title: string, url: string, category: string, commune: ?string, lat: float, lng: float, featured: bool}>
      */
     public function markers(): array
     {
@@ -148,6 +152,7 @@ class PublicationBrowser extends Component
                     'commune' => $publication->commune?->name,
                     'lat' => $point['lat'],
                     'lng' => $point['lng'],
+                    'featured' => (int) $publication->visibility_rank > 0,
                 ];
             })
             ->filter()
@@ -158,7 +163,7 @@ class PublicationBrowser extends Component
     #[Computed]
     public function hasActiveFilters(): bool
     {
-        return collect([$this->search, $this->category, $this->origin, $this->nature, $this->territory, $this->commune, $this->type])
+        return collect([$this->search, $this->category, $this->origin, $this->nature, $this->territory, $this->commune, $this->type, $this->visibility])
             ->contains(fn (string $value) => $value !== '');
     }
 

@@ -25,7 +25,7 @@ class PublicationController extends Controller
         // Brouillon, en attente, refusé : inexistant pour le public.
         abort_unless(Gate::allows('view', $publication), 404);
 
-        $publication->load(['type', 'category.parent', 'commune.territory', 'organization', 'author', 'event', 'images', 'attachments']);
+        $publication->load(['type', 'category.parent', 'commune.territory', 'organization', 'author', 'event', 'images', 'attachments', 'activeVisibility']);
 
         return view('publications.show', [
             'publication' => $publication,

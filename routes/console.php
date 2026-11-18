@@ -7,3 +7,5 @@ Schedule::command('publications:process-lifecycle')->hourly()->withoutOverlappin
 
 // Suppression des messages de contact au-delà de la durée de conservation (RGPD).
 Schedule::command('model:prune', ['--model' => [ContactMessage::class]])->daily();
+
+Schedule::command('visibility:expire')->hourly()->withoutOverlapping()->onOneServer();
