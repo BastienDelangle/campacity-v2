@@ -24,6 +24,7 @@ class CommuneSearchController extends Controller
         $communes = Commune::query()
             ->with('territory:id,name')
             ->where(fn ($q) => $q->where('name', 'like', $like.'%')->orWhere('postal_code', 'like', $like.'%'))
+            ->when($request->filled('territoire'), fn ($q) => $q->whereHas('territory', fn ($t) => $t->where('slug', $request->query('territoire'))))
             ->orderByRaw('name LIKE ? DESC', [$like.'%'])
             ->orderBy('name')
             ->limit(15)

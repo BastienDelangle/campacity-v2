@@ -67,14 +67,23 @@
                 </div>
             @endif
 
-            <div>
+            <div class="relative" wire:key="commune-filter-{{ $territory }}"
+                 x-data="communePicker(@js(route('communes.search', array_filter(['territoire' => $territory]))), @js($this->selectedCommune))"
+                 @click.outside="open = false"
+                 @commune-chosen="$wire.set('commune', String($event.detail.id))"
+                 @commune-cleared="$wire.set('commune', '')">
                 <label for="f-commune" class="mb-1 block text-xs font-bold text-[#58685b]">Commune</label>
-                <select id="f-commune" wire:model.live="commune" class="form-input py-2 text-sm" @disabled($this->communes->isEmpty())>
-                    <option value="">{{ $this->communes->isEmpty() ? 'Choisir un territoire' : 'Toutes' }}</option>
-                    @foreach ($this->communes as $c)
-                        <option value="{{ $c->id }}">{{ $c->name }}</option>
-                    @endforeach
-                </select>
+                <input id="f-commune" type="search" autocomplete="off" placeholder="Nom ou code postal" class="form-input py-2 text-sm"
+                       role="combobox" aria-autocomplete="list" aria-controls="f-commune-list" :aria-expanded="open.toString()"
+                       x-model="query" @input.debounce.250ms="search()" @keydown.down.prevent="move(1)" @keydown.up.prevent="move(-1)"
+                       @keydown.enter.prevent="confirm()" @keydown.escape="open = false">
+                <ul id="f-commune-list" role="listbox" x-show="open" x-cloak class="absolute z-20 mt-1 max-h-64 w-full min-w-56 overflow-auto rounded-lg border border-line bg-white py-1 shadow-lg">
+                    <template x-for="(result, index) in results" :key="result.id">
+                        <li role="option" :aria-selected="(index === active).toString()" @mousedown.prevent="choose(result)" @mouseenter="active = index"
+                            :class="index === active ? 'bg-lime' : ''" class="cursor-pointer px-3 py-2 text-sm" x-text="result.label"></li>
+                    </template>
+                    <li x-show="results.length === 0" class="px-3 py-2 text-sm text-muted">Aucune commune trouvée.</li>
+                </ul>
             </div>
         </div>
     </form>

@@ -30,6 +30,16 @@ class CommuneSearchTest extends TestCase
         $this->getJson(route('communes.search', ['q' => 'a']))->assertExactJson([]);
     }
 
+    public function test_autocomplete_can_be_restricted_to_a_territory(): void
+    {
+        $inside = Commune::factory()->create(['name' => 'Bayeux']);
+        Commune::factory()->create(['name' => 'Bayonne']);
+
+        $this->getJson(route('communes.search', ['q' => 'bay', 'territoire' => $inside->territory->slug]))
+            ->assertJsonCount(1)
+            ->assertJsonPath('0.id', $inside->id);
+    }
+
     public function test_import_command_creates_territory_and_communes_from_the_official_api(): void
     {
         Http::fake([

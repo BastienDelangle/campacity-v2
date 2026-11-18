@@ -181,20 +181,16 @@ class PublicationBrowser extends Component
     }
 
     /**
-     * Communes proposées : celles du territoire choisi, ou du territoire unique.
+     * Commune actuellement filtrée (pour pré-remplir le champ de saisie).
      *
-     * @return Collection<int, Commune>
+     * @return array{id: int, label: string}|null
      */
     #[Computed]
-    public function communes(): Collection
+    public function selectedCommune(): ?array
     {
-        $territory = $this->territory !== ''
-            ? $this->territories->firstWhere('slug', $this->territory)
-            : ($this->territories->count() === 1 ? $this->territories->first() : null);
+        $commune = ctype_digit($this->commune) ? Commune::find((int) $this->commune) : null;
 
-        return $territory
-            ? Commune::where('territory_id', $territory->id)->orderBy('name')->get(['id', 'name', 'postal_code'])
-            : collect();
+        return $commune ? ['id' => $commune->id, 'label' => $commune->displayName()] : null;
     }
 
     /**

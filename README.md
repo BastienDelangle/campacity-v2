@@ -128,6 +128,14 @@ Une application Laravel monolithique, organisée par domaine fonctionnel :
 
 ### Import des communes
 
+Territoire de lancement : **Normandie** (5 départements, 2 644 communes). Import sur un nouvel environnement :
+
+```bash
+php artisan campacity:import-communes "Normandie" --departement=14 --departement=27 --departement=50 --departement=61 --departement=76
+```
+
+Autres usages :
+
 Depuis l'API officielle du découpage administratif (geo.api.gouv.fr). Le territoire est créé s'il n'existe pas, et l'import peut être relancé sans créer de doublons :
 
 ```bash

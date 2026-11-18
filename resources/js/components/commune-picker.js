@@ -17,6 +17,9 @@ export default (endpoint, initial) => ({
         if (term.length < 2) {
             this.results = [];
             this.open = false;
+            if (term.length === 0) {
+                this.$dispatch('commune-cleared');
+            }
             return;
         }
 
@@ -24,7 +27,8 @@ export default (endpoint, initial) => ({
         this.controller = new AbortController();
 
         try {
-            const response = await fetch(`${endpoint}?q=${encodeURIComponent(term)}`, {
+            const separator = endpoint.includes('?') ? '&' : '?';
+            const response = await fetch(`${endpoint}${separator}q=${encodeURIComponent(term)}`, {
                 headers: { Accept: 'application/json' },
                 signal: this.controller.signal,
             });
@@ -43,6 +47,7 @@ export default (endpoint, initial) => ({
         this.query = result.label;
         this.open = false;
         window.dispatchEvent(new CustomEvent('commune-selected', { detail: result }));
+        this.$dispatch('commune-chosen', result);
     },
 
     move(step) {
