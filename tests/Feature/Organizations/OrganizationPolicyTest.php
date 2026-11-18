@@ -14,8 +14,6 @@ class OrganizationPolicyTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected bool $seed = true;
-
     /**
      * @return array<string, array{string, string, bool}>
      */

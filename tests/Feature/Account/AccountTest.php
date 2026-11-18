@@ -12,8 +12,6 @@ class AccountTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected bool $seed = true;
-
     public function test_user_can_update_contact_details_and_visibility(): void
     {
         $user = User::factory()->create();

@@ -17,8 +17,6 @@ class AdminResourcesAccessTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected bool $seed = true;
-
     #[TestWith(['/admin/users'])]
     #[TestWith(['/admin/organizations'])]
     #[TestWith(['/admin/territories'])]

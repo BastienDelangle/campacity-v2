@@ -43,15 +43,7 @@
             <section class="card mt-6 p-6" aria-labelledby="localisation">
                 <h2 id="localisation" class="mb-4 text-lg font-bold">Localisation</h2>
                 <x-form.input name="address" label="Adresse" :value="$organization->address" maxlength="255" autocomplete="street-address" />
-                <x-form.select name="commune_id" label="Commune" placeholder="— Choisir une commune —" help="Le territoire est déduit de la commune.">
-                    @foreach ($communes->groupBy(fn ($commune) => $commune->territory?->name ?? 'Hors territoire') as $territory => $group)
-                        <optgroup label="{{ $territory }}">
-                            @foreach ($group as $commune)
-                                <option value="{{ $commune->id }}" @selected((string) old('commune_id', $organization->commune_id) === (string) $commune->id)>{{ $commune->displayName() }}</option>
-                            @endforeach
-                        </optgroup>
-                    @endforeach
-                </x-form.select>
+                <x-form.commune-picker :commune="$organization->commune" help="Le territoire est déduit de la commune." />
             </section>
 
             <section class="card mt-6 p-6" aria-labelledby="coordonnees">

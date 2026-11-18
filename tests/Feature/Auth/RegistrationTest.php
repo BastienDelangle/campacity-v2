@@ -14,8 +14,6 @@ class RegistrationTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected bool $seed = true;
-
     public function test_registration_page_is_displayed(): void
     {
         $this->get('/register')->assertOk()->assertSee('Créer un compte');

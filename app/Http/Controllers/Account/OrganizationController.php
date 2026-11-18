@@ -7,11 +7,9 @@ use App\Enums\OrganizationRole;
 use App\Enums\OrganizationType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\OrganizationRequest;
-use App\Models\Commune;
 use App\Models\Organization;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
@@ -49,7 +47,7 @@ class OrganizationController extends Controller
     {
         Gate::authorize('update', $organization);
 
-        $organization->load(['members' => fn ($query) => $query->orderBy('name')]);
+        $organization->load(['commune', 'members' => fn ($query) => $query->orderBy('name')]);
 
         return view('account.organizations.form', [
             'organization' => $organization,
@@ -83,13 +81,12 @@ class OrganizationController extends Controller
     }
 
     /**
-     * @return array{types: list<OrganizationType>, communes: Collection<int, Commune>}
+     * @return array{types: list<OrganizationType>}
      */
     private function formOptions(): array
     {
         return [
             'types' => OrganizationType::cases(),
-            'communes' => Commune::query()->with('territory:id,name')->orderBy('name')->get(['id', 'name', 'postal_code', 'territory_id']),
         ];
     }
 }

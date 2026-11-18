@@ -30,6 +30,6 @@
 
     @include('partials.footer')
 
-    @livewireScripts
+    @livewireScriptConfig
 </body>
 </html>

@@ -11,9 +11,9 @@ use App\Enums\PublicationStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PublicationRequest;
 use App\Models\Category;
-use App\Models\Commune;
 use App\Models\Publication;
 use App\Models\PublicationType;
+use App\Models\Territory;
 use App\Support\Settings;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
@@ -84,7 +84,7 @@ class PublicationController extends Controller
     {
         Gate::authorize('update', $publication);
 
-        $publication->load(['event', 'images', 'attachments']);
+        $publication->load(['event', 'images', 'attachments', 'commune']);
 
         return view('account.publications.form', [
             'publication' => $publication,
@@ -126,7 +126,7 @@ class PublicationController extends Controller
             'categories' => Category::active()->roots()->ordered()
                 ->with(['children' => fn ($query) => $query->active()->ordered()])
                 ->get(),
-            'communes' => Commune::query()->with('territory:id,name')->orderBy('name')->get(['id', 'name', 'postal_code', 'territory_id']),
+            'mapCenter' => $this->mapCenter(),
             'organizations' => $request->user()->organizations()->orderBy('name')->get(['organizations.id', 'organizations.name']),
             'natures' => PublicationNature::cases(),
             'origins' => PublicationOrigin::cases(),
@@ -135,5 +135,21 @@ class PublicationController extends Controller
             'maxAttachments' => $settings->int('publication_max_attachments'),
             'attachmentTypes' => PublicationRequest::ATTACHMENT_TYPES,
         ];
+    }
+
+    /**
+     * @return array{lat: float, lng: float, zoom: int}
+     */
+    private function mapCenter(): array
+    {
+        $territory = Territory::active()->whereNotNull('center_latitude')->orderBy('id')->first();
+
+        if ($territory) {
+            return ['lat' => $territory->center_latitude, 'lng' => $territory->center_longitude, 'zoom' => $territory->default_zoom ?? 10];
+        }
+
+        [$lat, $lng] = config('campacity.map.default_center');
+
+        return ['lat' => $lat, 'lng' => $lng, 'zoom' => (int) config('campacity.map.default_zoom')];
     }
 }

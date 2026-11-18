@@ -24,11 +24,14 @@ class OrganizationManagementTest extends TestCase
     public function test_create_and_edit_forms_render(): void
     {
         $owner = User::factory()->create();
-        $commune = Commune::factory()->create(['name' => 'Saint-Lô']);
-        $organization = Organization::factory()->ownedBy($owner)->create();
+        $commune = Commune::factory()->create(['name' => 'Saint-Lô', 'postal_code' => '50000']);
+        $organization = Organization::factory()->ownedBy($owner)->create(['commune_id' => $commune->id]);
 
-        $this->actingAs($owner)->get(route('account.organizations.create'))->assertOk()->assertSee('Saint-Lô');
-        $this->actingAs($owner)->get(route('account.organizations.edit', $organization))->assertOk()->assertSee('Ajouter un responsable');
+        $this->actingAs($owner)->get(route('account.organizations.create'))->assertOk()->assertSee('commune_id-search', false);
+        $this->actingAs($owner)->get(route('account.organizations.edit', $organization))
+            ->assertOk()
+            ->assertSee('Ajouter un responsable')
+            ->assertSee('Saint-Lô (50000)');
     }
 
     public function test_user_can_create_an_organization_and_becomes_its_owner(): void

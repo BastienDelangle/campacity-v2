@@ -66,7 +66,7 @@ Toute la configuration passe par `.env` (voir `.env.example`) :
 ```bash
 composer dev                    # serveur Vite + file d'attente + logs
 npm run build                   # build des assets front
-php artisan test                # suite de tests (base campacity_testing)
+php artisan test                # suite de tests (base campacity_testing, données de référence semées)
 vendor/bin/pint                 # formatage du code
 php artisan migrate:fresh --seed  # réinitialise la base locale (destructif)
 php artisan queue:work          # traite la file d'attente
@@ -109,6 +109,33 @@ Une application Laravel monolithique, organisée par domaine fonctionnel :
   - les images sont redimensionnées (1 600 px de large maximum), ré-encodées en WebP et débarrassées de leurs métadonnées EXIF (GD natif, sans dépendance) ;
   - les documents sont stockés sur le disque privé et servis seulement si la publication est consultable.
 
+### Recherche, rubriques et carte
+
+- **Pages :**
+  - `/` (Découvrir), `/annonces` (toutes), `/cote-urbain`, `/cote-rural`, `/formations-et-rendez-vous` ;
+  - « Entre les deux » apparaît dans les deux rubriques, urbaine et rurale ;
+  - l'agenda regroupe les types « événement » et les catégories listées dans `campacity.agenda_category_slugs`.
+- **Moteur :** `App\Queries\PublicationSearch` est la requête unique utilisée par la liste **et** la carte, qui affichent donc toujours les mêmes résultats.
+  - Recherche plein texte (index FULLTEXT MySQL sur le titre et la description), plus la commune, le code postal, le territoire et la catégorie.
+  - Filtres combinables : catégorie (sous-catégories incluses), origine, nature, type, territoire, commune.
+  - Seules les publications publiées et non échues sont renvoyées.
+- **Composant `App\Livewire\PublicationBrowser` :** les filtres sont reflétés dans l'URL, la liste est paginée, la carte se met à jour à chaque filtre, avec un message quand rien ne correspond. Une page filtrée est en `noindex, follow` et pointe vers sa page canonique.
+- **Carte :**
+  - Leaflet, chargé uniquement sur les pages qui affichent une carte ;
+  - le fournisseur de tuiles se règle avec `MAP_TILE_URL` et `MAP_ATTRIBUTION`. OpenStreetMap par défaut : pour un fort trafic en production, prévoir un fournisseur dédié, conformément à la politique d'usage d'OSM ;
+  - les repères respectent la précision choisie par l'auteur.
+- **Saisie de commune :** autocomplétion par nom ou code postal (`/communes/recherche`, limité à 60 requêtes par minute). Dans le formulaire de publication, on peut placer un repère sur la carte.
+
+### Import des communes
+
+Depuis l'API officielle du découpage administratif (geo.api.gouv.fr). Le territoire est créé s'il n'existe pas, et l'import peut être relancé sans créer de doublons :
+
+```bash
+php artisan campacity:import-communes "Nom du territoire" --epci=<SIREN EPCI>
+php artisan campacity:import-communes "Nom du territoire" --departement=50
+php artisan campacity:import-communes "Nom du territoire" --insee=50147 --insee=50003
+```
+
 ### Paramètres administrables
 
 Ils sont réglables dans Administration › Configuration › Paramètres. Les valeurs par défaut sont dans `config/campacity.php`, et la durée de mise en ligne reste à valider :
@@ -129,7 +156,7 @@ Ils sont réglables dans Administration › Configuration › Paramètres. Les v
 - [x] Phase 1 : socle technique (Laravel, MySQL, Herd, Filament, authentification, rôles et permissions)
 - [x] Phase 2 : comptes et organisations
 - [x] Phase 3 : publications
-- [ ] Phase 4 : recherche et territoires
+- [x] Phase 4 : recherche et territoires
 - [ ] Phase 5 : modération et contact
 - [ ] Phase 6 : partenaires et visibilité
 - [ ] Phase 7 : adhésions et paiements (HelloAsso)

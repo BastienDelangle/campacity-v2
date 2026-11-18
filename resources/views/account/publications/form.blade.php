@@ -79,16 +79,18 @@
                     @error('origin')<p class="form-error">{{ $message }}</p>@enderror
                 </fieldset>
 
-                <x-form.select name="commune_id" label="Commune" placeholder="— Choisir une commune —" required>
-                    @foreach ($communes->groupBy(fn ($commune) => $commune->territory?->name ?? 'Hors territoire') as $territory => $group)
-                        <optgroup label="{{ $territory }}">
-                            @foreach ($group as $commune)
-                                <option value="{{ $commune->id }}" @selected((string) old('commune_id', $publication->commune_id) === (string) $commune->id)>{{ $commune->displayName() }}</option>
-                            @endforeach
-                        </optgroup>
-                    @endforeach
-                </x-form.select>
+                <x-form.commune-picker :commune="$publication->commune" required />
                 <x-form.input name="address" label="Adresse" :value="$publication->address" maxlength="255" autocomplete="street-address" />
+                @php($point = ['lat' => old('latitude', $publication->latitude) !== null ? (float) old('latitude', $publication->latitude) : null, 'lng' => old('longitude', $publication->longitude) !== null ? (float) old('longitude', $publication->longitude) : null])
+                <div class="mb-4" x-data="locationPicker(@js($point), @js($mapCenter), @js(config('campacity.map')))">
+                    <span class="form-label">Position sur la carte <span class="font-normal text-muted">(facultatif)</span></span>
+                    <p class="form-help mb-2">Cliquez sur la carte pour placer un repère, déplacez-le si besoin. Sans repère, le centre de la commune est utilisé.</p>
+                    <div wire:ignore class="h-64 overflow-hidden rounded-xl border border-line"><div x-ref="map" class="h-full w-full"></div></div>
+                    <input type="hidden" name="latitude" :value="lat ?? ''">
+                    <input type="hidden" name="longitude" :value="lng ?? ''">
+                    <button type="button" x-show="lat !== null" x-cloak @click="clear()" class="mt-2 text-sm font-semibold text-red-700 hover:underline">Retirer le repère</button>
+                    @error('latitude')<p class="form-error">{{ $message }}</p>@enderror
+                </div>
                 <x-form.select name="location_precision" label="Ce qui est affiché publiquement" help="Choisissez « Commune uniquement » si vous ne souhaitez pas révéler l'adresse.">
                     @foreach ($precisions as $precision)
                         <option value="{{ $precision->value }}" @selected(old('location_precision', $publication->location_precision?->value) === $precision->value)>{{ $precision->label() }}</option>

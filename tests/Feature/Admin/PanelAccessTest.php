@@ -14,8 +14,6 @@ class PanelAccessTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected bool $seed = true;
-
     private function userWithRole(Role $role, bool $verified = true): User
     {
         $factory = User::factory();

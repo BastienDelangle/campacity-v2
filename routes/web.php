@@ -5,11 +5,18 @@ use App\Http\Controllers\Account\OrganizationController as AccountOrganizationCo
 use App\Http\Controllers\Account\OrganizationMemberController;
 use App\Http\Controllers\Account\PublicationController as AccountPublicationController;
 use App\Http\Controllers\Account\PublicationStatusController;
+use App\Http\Controllers\BrowseController;
+use App\Http\Controllers\CommuneSearchController;
 use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\PublicationController;
 use Illuminate\Support\Facades\Route;
 
-Route::view('/', 'home')->name('home');
+Route::get('/', [BrowseController::class, 'home'])->name('home');
+Route::get('/annonces', [BrowseController::class, 'section'])->defaults('section', 'all')->name('publications.index');
+Route::get('/cote-urbain', [BrowseController::class, 'section'])->defaults('section', 'urban')->name('browse.urban');
+Route::get('/cote-rural', [BrowseController::class, 'section'])->defaults('section', 'rural')->name('browse.rural');
+Route::get('/formations-et-rendez-vous', [BrowseController::class, 'section'])->defaults('section', 'agenda')->name('browse.agenda');
+Route::get('/communes/recherche', CommuneSearchController::class)->middleware('throttle:60,1')->name('communes.search');
 
 Route::get('/organisations/{organization}', [OrganizationController::class, 'show'])->name('organizations.show');
 Route::get('/annonces/{slug}', [PublicationController::class, 'show'])->name('publications.show');

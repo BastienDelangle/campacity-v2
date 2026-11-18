@@ -21,6 +21,24 @@ return [
         'publication_max_attachments' => 3,
     ],
 
+    // Catégories rattachées à la rubrique « Formations et rendez-vous »
+    // (en plus des types « événement »).
+    'agenda_category_slugs' => ['formations'],
+
+    // Carte : fournisseur de tuiles configurable (OpenStreetMap par défaut).
+    // Pour un usage en production à fort trafic, prévoir un fournisseur dédié
+    // (la politique d'usage des tuiles OSM limite les volumes).
+    'map' => [
+        'tile_url' => env('MAP_TILE_URL', 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'),
+        'attribution' => env('MAP_ATTRIBUTION', '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'),
+        'max_zoom' => (int) env('MAP_MAX_ZOOM', 18),
+        // Centre par défaut si aucun territoire actif n'a de centre défini (France).
+        'default_center' => [46.6, 2.4],
+        'default_zoom' => 6,
+        // Nombre maximal de repères envoyés à la carte.
+        'max_markers' => 500,
+    ],
+
     // Images : largeur maximale après redimensionnement, en pixels.
     'image_max_width' => 1600,
 ];

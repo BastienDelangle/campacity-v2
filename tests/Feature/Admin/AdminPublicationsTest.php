@@ -20,8 +20,6 @@ class AdminPublicationsTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected bool $seed = true;
-
     private function userWithRole(Role $role): User
     {
         return User::factory()->create()->assignRole($role->value);

@@ -15,6 +15,9 @@
             <a href="{{ $href ?? route('publications.show', $publication->slug) }}" class="after:absolute after:inset-0 hover:underline">{{ $publication->title }}</a>
         </h3>
         <p class="mt-2 text-sm leading-relaxed text-muted">{{ $publication->excerpt(120) }}</p>
+        @if ($publication->relationLoaded('event') && $publication->event)
+            <p class="mt-3 text-sm font-bold text-accent-dark">📅 {{ $publication->event->starts_at->translatedFormat('D j M Y') }}@if($publication->event->starts_at->format('H:i') !== '00:00') · {{ $publication->event->starts_at->format('H\hi') }}@endif</p>
+        @endif
         <p class="mt-auto pt-3 text-xs text-[#758477]">
             {{ $publication->type->name }}@if($publication->commune) · {{ $publication->commune->name }}@endif
         </p>

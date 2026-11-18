@@ -1,6 +1,10 @@
 @php
     $nav = [
-        ['label' => 'Découvrir', 'url' => url('/')],
+        ['label' => 'Découvrir', 'url' => route('home')],
+        ['label' => 'Côté urbain', 'url' => route('browse.urban')],
+        ['label' => 'Côté rural', 'url' => route('browse.rural')],
+        ['label' => 'Toutes les annonces', 'url' => route('publications.index')],
+        ['label' => 'Formations & rendez-vous', 'url' => route('browse.agenda')],
     ];
 @endphp
 <header x-data="{ open: false }" class="sticky top-0 z-40 border-b border-line bg-white">
@@ -9,13 +13,13 @@
             camp<span class="text-[#d98644]">a</span>city
         </a>
 
-        <nav class="mx-auto hidden gap-6 lg:flex" aria-label="Navigation principale">
+        <nav class="mx-auto hidden gap-5 xl:flex" aria-label="Navigation principale">
             @foreach ($nav as $item)
                 <a href="{{ $item['url'] }}" @class(['text-sm text-[#3e5548] hover:text-brand', 'font-extrabold text-brand underline underline-offset-8' => url()->current() === $item['url']])>{{ $item['label'] }}</a>
             @endforeach
         </nav>
 
-        <div class="ml-auto hidden items-center gap-3 lg:flex">
+        <div class="ml-auto hidden items-center gap-3 xl:flex">
             <a href="{{ route('account.publications.create') }}" class="btn-primary">+ Publier</a>
             @auth
                 <a href="{{ route('account.dashboard') }}" class="btn-secondary">Mon espace</a>
@@ -28,13 +32,13 @@
             @endauth
         </div>
 
-        <button type="button" class="ml-auto rounded-lg p-2 text-brand lg:hidden" @click="open = !open" :aria-expanded="open.toString()" aria-controls="menu-mobile">
+        <button type="button" class="ml-auto rounded-lg p-2 text-brand xl:hidden" @click="open = !open" :aria-expanded="open.toString()" aria-controls="menu-mobile">
             <span class="sr-only">Menu</span>
             <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
         </button>
     </div>
 
-    <nav id="menu-mobile" x-cloak x-show="open" x-transition class="border-t border-line px-4 pb-4 lg:hidden" aria-label="Navigation mobile">
+    <nav id="menu-mobile" x-cloak x-show="open" x-transition class="border-t border-line px-4 pb-4 xl:hidden" aria-label="Navigation mobile">
         @foreach ($nav as $item)
             <a href="{{ $item['url'] }}" class="block py-2.5 text-sm font-semibold text-[#3e5548]">{{ $item['label'] }}</a>
         @endforeach
