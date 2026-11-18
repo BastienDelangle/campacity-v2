@@ -10,10 +10,11 @@
                     @case(\App\Enums\PublicationStatus::Rejected) Publication refusée. Corrigez-la puis soumettez-la à nouveau. @break
                     @case(\App\Enums\PublicationStatus::Expired) Publication expirée : elle n'est plus visible. @break
                     @case(\App\Enums\PublicationStatus::Archived) Publication archivée : elle n'est plus visible. @break
+                    @case(\App\Enums\PublicationStatus::Suspended) Publication suspendue par l'équipe de modération. @break
                     @default En ligne @if($publication->expires_at) jusqu'au {{ $publication->expires_at->translatedFormat('j F Y') }}@endif.
                 @endswitch
             </p>
-            @if ($status === \App\Enums\PublicationStatus::Rejected && $publication->rejection_reason)
+            @if (in_array($status, [\App\Enums\PublicationStatus::Rejected, \App\Enums\PublicationStatus::Suspended], true) && $publication->rejection_reason)
                 <p class="mt-2 text-sm"><strong>Motif :</strong> {{ $publication->rejection_reason }}</p>
             @endif
             @error('status')<p class="form-error" role="alert">{{ $message }}</p>@enderror

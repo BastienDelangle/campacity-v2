@@ -39,6 +39,13 @@ return [
         'max_markers' => 500,
     ],
 
+    // Conservation des messages de contact, en jours (RGPD). À valider.
+    'contact_message_retention_days' => (int) env('CONTACT_MESSAGE_RETENTION_DAYS', 365),
+
+    // Anti-spam des formulaires publics : délai minimal (secondes) entre
+    // l'affichage du formulaire et son envoi (les robots répondent instantanément).
+    'form_min_seconds' => 3,
+
     // Images : largeur maximale après redimensionnement, en pixels.
     'image_max_width' => 1600,
 ];

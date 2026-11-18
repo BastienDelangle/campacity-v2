@@ -3,7 +3,10 @@
 namespace App\Providers;
 
 use App\Support\Settings;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
@@ -22,6 +25,12 @@ class AppServiceProvider extends ServiceProvider
         Model::shouldBeStrict(! $this->app->isProduction());
 
         Route::resourceVerbs(['create' => 'creer', 'edit' => 'modifier']);
+
+        // Formulaires publics (contact, signalement) : limite par IP.
+        RateLimiter::for('public-forms', fn (Request $request) => [
+            Limit::perMinute(3)->by('pf-min|'.$request->ip()),
+            Limit::perDay(30)->by('pf-day|'.$request->ip()),
+        ]);
 
         Password::defaults(fn () => $this->app->isProduction()
             ? Password::min(10)->letters()->mixedCase()->numbers()->uncompromised()

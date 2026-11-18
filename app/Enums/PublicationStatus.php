@@ -13,6 +13,8 @@ enum PublicationStatus: string implements HasColor, HasLabel
     case Rejected = 'rejected';
     case Archived = 'archived';
     case Expired = 'expired';
+    /** Retirée par la modération (contenu problématique, signalement…). */
+    case Suspended = 'suspended';
 
     public function getLabel(): string
     {
@@ -28,6 +30,7 @@ enum PublicationStatus: string implements HasColor, HasLabel
             self::Rejected => 'Refusée',
             self::Archived => 'Archivée',
             self::Expired => 'Expirée',
+            self::Suspended => 'Suspendue',
         };
     }
 
@@ -39,6 +42,7 @@ enum PublicationStatus: string implements HasColor, HasLabel
             self::Published => 'success',
             self::Rejected => 'danger',
             self::Archived, self::Expired => 'gray',
+            self::Suspended => 'danger',
         };
     }
 

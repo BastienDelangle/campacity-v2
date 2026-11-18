@@ -31,23 +31,23 @@ class PublicationStatusController extends Controller
         }, $publication);
     }
 
-    public function archive(Publication $publication): RedirectResponse
+    public function archive(Request $request, Publication $publication): RedirectResponse
     {
         Gate::authorize('manage', $publication);
 
-        return $this->attempt(function () use ($publication) {
-            $this->lifecycle->archive($publication);
+        return $this->attempt(function () use ($request, $publication) {
+            $this->lifecycle->archive($publication, $request->user());
 
             return 'Publication archivée : elle n\'est plus visible publiquement.';
         }, $publication);
     }
 
-    public function renew(Publication $publication): RedirectResponse
+    public function renew(Request $request, Publication $publication): RedirectResponse
     {
         Gate::authorize('manage', $publication);
 
-        return $this->attempt(function () use ($publication) {
-            $this->lifecycle->renew($publication);
+        return $this->attempt(function () use ($request, $publication) {
+            $this->lifecycle->renew($publication, $request->user());
 
             return 'Publication renouvelée jusqu\'au '.$publication->expires_at->translatedFormat('j F Y').'.';
         }, $publication);

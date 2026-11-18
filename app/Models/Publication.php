@@ -131,6 +131,22 @@ class Publication extends Model
     }
 
     /**
+     * @return HasMany<ModerationLog, $this>
+     */
+    public function moderationLogs(): HasMany
+    {
+        return $this->hasMany(ModerationLog::class)->latest('created_at')->latest('id');
+    }
+
+    /**
+     * @return HasMany<PublicationReport, $this>
+     */
+    public function reports(): HasMany
+    {
+        return $this->hasMany(PublicationReport::class);
+    }
+
+    /**
      * Publications visibles publiquement : publiées et non échues.
      *
      * @param  Builder<self>  $query

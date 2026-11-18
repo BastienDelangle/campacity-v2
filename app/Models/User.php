@@ -10,6 +10,7 @@ use Filament\Panel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -74,6 +75,26 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
     public function canPublishWithoutModeration(): bool
     {
         return $this->is_trusted || $this->can(Permission::ModeratePublications->value);
+    }
+
+    /**
+     * Comptes actifs disposant d'une permission (destinataires des alertes d'administration).
+     *
+     * @param  Builder<self>  $query
+     */
+    public function scopeActiveWithPermission(Builder $query, Permission $permission): void
+    {
+        $query->permission($permission->value)
+            ->whereNull('anonymized_at')
+            ->whereNotNull('email_verified_at');
+    }
+
+    /**
+     * @return HasMany<ContactMessage, $this>
+     */
+    public function receivedMessages(): HasMany
+    {
+        return $this->hasMany(ContactMessage::class, 'recipient_id');
     }
 
     public function isAnonymized(): bool

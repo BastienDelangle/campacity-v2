@@ -16,6 +16,7 @@ class AccountController extends Controller
         return view('account.dashboard', [
             'organizationsCount' => $request->user()->organizations()->count(),
             'publicationsCount' => $request->user()->publications()->count(),
+            'unreadMessages' => $request->user()->receivedMessages()->whereNull('read_at')->count(),
         ]);
     }
 

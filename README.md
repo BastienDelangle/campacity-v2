@@ -144,6 +144,29 @@ php artisan campacity:import-communes "Nom du territoire" --departement=50
 php artisan campacity:import-communes "Nom du territoire" --insee=50147 --insee=50003
 ```
 
+### Modération
+
+- **Modération mixte :**
+  - les publications des nouveaux utilisateurs passent en attente ;
+  - celles des utilisateurs « de confiance » (case à cocher dans Administration › Utilisateurs) et des modérateurs paraissent immédiatement ;
+  - le niveau de confiance ne s'acquiert jamais automatiquement.
+- **Actions des modérateurs** (liste ou fiche détaillée `/admin/publications/{slug}`) : valider, refuser avec motif, suspendre avec motif, rétablir.
+  - Une publication suspendue est retirée du site (404). Son auteur ne peut plus la modifier, la renouveler ni l'archiver.
+- **Historique :** chaque transition, y compris automatique, est enregistrée dans `moderation_logs` (qui, quand, avant → après, motif) et affichée sur la fiche détaillée. Mécanisme : `PublicationLifecycle` émet `PublicationStatusChanged`, sur lequel se branchent les écouteurs `RecordModerationLog` et `SendPublicationStatusNotifications`.
+- **E-mails à l'auteur :** publication en attente, en ligne (validée ou rétablie), refusée ou suspendue, avec le motif.
+- **Alertes aux modérateurs :** notification dans la cloche de l'administration à chaque soumission et à chaque signalement.
+
+### Signalements et contact
+
+- **Signalement :** visiteur ou utilisateur, avec un motif, un commentaire facultatif et un e-mail facultatif. Un seul signalement par visiteur et par publication. Traitement dans Administration › Signalements : « Traiter », avec suspension possible, ou « Classer sans suite ».
+- **Formulaire de contact :**
+  - le message arrive par e-mail chez l'auteur, avec l'expéditeur en adresse de réponse. L'adresse de l'auteur n'est jamais affichée ;
+  - les messages sont consultables dans `/espace/messages`, puis supprimés automatiquement après `CONTACT_MESSAGE_RETENTION_DAYS` jours (365 par défaut, à valider).
+- **Anti-spam, sans service tiers (`App\Support\SpamGuard`) :** champ piège, délai minimal de 3 s avant l'envoi, limitation à 3 envois par minute et 30 par jour par IP. Seule une empreinte non réversible de l'IP est conservée.
+- **Bienvenue :** un e-mail est envoyé une fois l'adresse e-mail vérifiée.
+
+> Les e-mails passent par la file d'attente : en local, lancer `php artisan queue:work` (ou `composer dev`) pour qu'ils partent ; ils sont écrits dans `storage/logs/laravel.log` avec `MAIL_MAILER=log`.
+
 ### Paramètres administrables
 
 Ils sont réglables dans Administration › Configuration › Paramètres. Les valeurs par défaut sont dans `config/campacity.php`, et la durée de mise en ligne reste à valider :
@@ -165,7 +188,7 @@ Ils sont réglables dans Administration › Configuration › Paramètres. Les v
 - [x] Phase 2 : comptes et organisations
 - [x] Phase 3 : publications
 - [x] Phase 4 : recherche et territoires
-- [ ] Phase 5 : modération et contact
+- [x] Phase 5 : modération et contact
 - [ ] Phase 6 : partenaires et visibilité
 - [ ] Phase 7 : adhésions et paiements (HelloAsso)
 - [ ] Phase 8 : finalisation

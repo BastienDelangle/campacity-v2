@@ -119,6 +119,14 @@
                     @endif
                 </section>
 
+                @if ($publication->contact_form_enabled && $publication->isPubliclyVisible() && ! $publication->author->isAnonymized())
+                    @include('publications.partials.contact-form')
+                @endif
+
+                @if ($publication->isPubliclyVisible())
+                    @include('publications.partials.report-form')
+                @endif
+
                 @if ($publication->expires_at && ! $publication->event)
                     <p class="text-xs text-muted">Annonce valable jusqu'au {{ $publication->expires_at->translatedFormat('j F Y') }}.</p>
                 @endif

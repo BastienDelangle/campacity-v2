@@ -5,7 +5,11 @@ namespace App\Filament\Resources\Publications;
 use App\Enums\PublicationStatus;
 use App\Filament\Resources\Publications\Pages\EditPublication;
 use App\Filament\Resources\Publications\Pages\ListPublications;
+use App\Filament\Resources\Publications\Pages\ViewPublication;
+use App\Filament\Resources\Publications\RelationManagers\ModerationLogsRelationManager;
+use App\Filament\Resources\Publications\RelationManagers\ReportsRelationManager;
 use App\Filament\Resources\Publications\Schemas\PublicationForm;
+use App\Filament\Resources\Publications\Schemas\PublicationInfolist;
 use App\Filament\Resources\Publications\Tables\PublicationsTable;
 use App\Models\Publication;
 use BackedEnum;
@@ -45,6 +49,22 @@ class PublicationResource extends Resource
         return 'En attente de modération';
     }
 
+    public static function infolist(Schema $schema): Schema
+    {
+        return PublicationInfolist::configure($schema);
+    }
+
+    /**
+     * @return list<class-string>
+     */
+    public static function getRelations(): array
+    {
+        return [
+            ModerationLogsRelationManager::class,
+            ReportsRelationManager::class,
+        ];
+    }
+
     public static function form(Schema $schema): Schema
     {
         return PublicationForm::configure($schema);
@@ -65,6 +85,7 @@ class PublicationResource extends Resource
     {
         return [
             'index' => ListPublications::route('/'),
+            'view' => ViewPublication::route('/{record}'),
             'edit' => EditPublication::route('/{record}/edit'),
         ];
     }
